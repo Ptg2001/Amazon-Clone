@@ -13,6 +13,7 @@
     "test:seed": "node scripts/testSeed.js"
   },
   "dependencies": {
+    "amazon-clone-mern": "file:..",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",
     "compression": "^1.7.4",
@@ -28,6 +29,7 @@
     "nodemailer": "^6.9.7",
     "pdfkit": "^0.17.2",
     "razorpay": "^2.9.6",
+    "serverless-http": "^3.2.0",
     "stripe": "^14.7.0"
   },
   "devDependencies": {

@@ -11,6 +11,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.5.2",
+    "amazon-clone-mern": "file:..",
     "axios": "^1.6.2",
     "classnames": "^2.3.2",
     "date-fns": "^2.30.0",
@@ -39,7 +40,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "vercel-build": "vite build"
   },
   "eslintConfig": {
     "extends": [
