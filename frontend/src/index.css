@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Amazon-like typography for product detail pages */
+.font-amazon {
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* Optional: tighter letter-spacing to mimic Amazon Ember */
+.font-amazon h1, .font-amazon h2, .font-amazon h3 {
+  letter-spacing: -0.01em;
+}
+.font-amazon .buybox-button {
+  font-weight: 600;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f3f3f3;
+  color: #0f1111;
+  line-height: 1.6;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Amazon-like scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Custom utility classes */
+.text-amazon-orange {
+  color: #ff9900;
+}
+
+.bg-amazon-orange {
+  background-color: #ff9900;
+}
+
+.border-amazon-orange {
+  border-color: #ff9900;
+}
+
+.hover\:bg-amazon-orange:hover {
+  background-color: #ff9900;
+}
+
+.hover\:text-amazon-orange:hover {
+  color: #ff9900;
+}
+
+/* Amazon-like button styles */
+.btn-amazon {
+  @apply bg-amazon-orange text-white px-4 py-2 rounded-md font-medium hover:bg-orange-600 transition-colors duration-200;
+}
+
+.btn-amazon-secondary {
+  @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-medium hover:bg-gray-300 transition-colors duration-200;
+}
+
+.btn-amazon-outline {
+  @apply border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors duration-200;
+}
+
+/* Amazon-like input styles */
+.input-amazon {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-transparent;
+}
+
+/* Amazon-like card styles */
+.card-amazon {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Product grid responsive */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* Amazon-like navigation */
+.nav-amazon {
+  @apply bg-gray-900 text-white;
+}
+
+.nav-amazon .nav-link {
+  @apply text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+}
+
+.nav-amazon .nav-link.active {
+  @apply text-white bg-gray-800;
+}
+
+/* Amazon-like search bar */
+.search-amazon {
+  @apply flex-1 max-w-2xl mx-4;
+}
+
+.search-amazon input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-transparent;
+}
+
+.search-amazon button {
+  @apply px-4 py-2 bg-amazon-orange text-white rounded-r-md hover:bg-orange-600 transition-colors duration-200;
+}
+
+/* Amazon-like product card */
+.product-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Amazon-like rating stars */
+.rating-stars {
+  @apply flex items-center space-x-1;
+}
+
+.rating-stars .star {
+  @apply text-yellow-400;
+}
+
+.rating-stars .star.empty {
+  @apply text-gray-300;
+}
+
+/* Amazon-like price */
+.price-amazon {
+  @apply text-lg font-bold text-red-600;
+}
+
+.price-amazon.original {
+  @apply text-sm text-gray-500 line-through;
+}
+
+.price-amazon.savings {
+  @apply text-sm text-green-600 font-medium;
+}
+
+/* Amazon-like badge */
+.badge-amazon {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-amazon.primary {
+  @apply bg-amazon-orange text-white;
+}
+
+.badge-amazon.secondary {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.badge-amazon.success {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-amazon.danger {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Amazon-like modal */
+.modal-amazon {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.modal-amazon .modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-screen overflow-y-auto;
+}
+
+/* Amazon-like form */
+.form-amazon .form-group {
+  @apply mb-4;
+}
+
+.form-amazon .form-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.form-amazon .form-input {
+  @apply input-amazon;
+}
+
+.form-amazon .form-error {
+  @apply text-red-600 text-sm mt-1;
+}
+
+/* Amazon-like pagination */
+.pagination-amazon {
+  @apply flex items-center justify-center space-x-2 mt-8;
+}
+
+.pagination-amazon .page-btn {
+  @apply px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-700 transition-colors duration-200;
+}
+
+.pagination-amazon .page-btn.active {
+  @apply text-white bg-amazon-orange border-amazon-orange;
+}
+
+.pagination-amazon .page-btn.disabled {
+  @apply opacity-50 cursor-not-allowed hover:bg-white hover:text-gray-500;
+}
+
+/* Amazon-like breadcrumb */
+.breadcrumb-amazon {
+  @apply flex items-center space-x-2 text-sm text-gray-500 mb-4;
+}
+
+.breadcrumb-amazon a {
+  @apply hover:text-amazon-orange transition-colors duration-200;
+}
+
+.breadcrumb-amazon .separator {
+  @apply text-gray-400;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .mobile-hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
+  .desktop-hidden {
+    display: none;
+  }
+}
+
+/* Animation utilities */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Focus styles for accessibility */
+.focus-visible:focus {
+  @apply outline-none ring-2 ring-amazon-orange ring-offset-2;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Hide horizontal scrollbar utility */
+.no-x-scrollbar {
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+.no-x-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
