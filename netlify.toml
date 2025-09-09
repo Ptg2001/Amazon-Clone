@@ -20,6 +20,9 @@
 
 [functions]
   directory = "netlify/functions"
+  included_files = [
+    "backend/dist/**"
+  ]
 
 [dev]
   command = "npm run dev"

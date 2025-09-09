@@ -8,14 +8,16 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 // Import route handlers from compiled backend (built during Netlify build)
-const authRoutes = require('../../backend/dist/routes/auth');
-const userRoutes = require('../../backend/dist/routes/users');
-const productRoutes = require('../../backend/dist/routes/products');
-const categoryRoutes = require('../../backend/dist/routes/categories');
-const orderRoutes = require('../../backend/dist/routes/orders');
-const paymentRoutes = require('../../backend/dist/routes/payments');
-const adminRoutes = require('../../backend/dist/routes/admin');
-const cartRoutes = require('../../backend/dist/routes/cart');
+const path = require('path');
+const distRoot = path.resolve(__dirname, '../../backend/dist');
+const authRoutes = require(path.join(distRoot, 'routes/auth'));
+const userRoutes = require(path.join(distRoot, 'routes/users'));
+const productRoutes = require(path.join(distRoot, 'routes/products'));
+const categoryRoutes = require(path.join(distRoot, 'routes/categories'));
+const orderRoutes = require(path.join(distRoot, 'routes/orders'));
+const paymentRoutes = require(path.join(distRoot, 'routes/payments'));
+const adminRoutes = require(path.join(distRoot, 'routes/admin'));
+const cartRoutes = require(path.join(distRoot, 'routes/cart'));
 
 const app = express();
 
