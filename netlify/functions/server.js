@@ -7,15 +7,15 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-// Import route handlers
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const productRoutes = require('./routes/products');
-const categoryRoutes = require('./routes/categories');
-const orderRoutes = require('./routes/orders');
-const paymentRoutes = require('./routes/payments');
-const adminRoutes = require('./routes/admin');
-const cartRoutes = require('./routes/cart');
+// Import route handlers from compiled backend (built during Netlify build)
+const authRoutes = require('../../backend/dist/routes/auth');
+const userRoutes = require('../../backend/dist/routes/users');
+const productRoutes = require('../../backend/dist/routes/products');
+const categoryRoutes = require('../../backend/dist/routes/categories');
+const orderRoutes = require('../../backend/dist/routes/orders');
+const paymentRoutes = require('../../backend/dist/routes/payments');
+const adminRoutes = require('../../backend/dist/routes/admin');
+const cartRoutes = require('../../backend/dist/routes/cart');
 
 const app = express();
 
