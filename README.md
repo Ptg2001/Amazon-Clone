@@ -237,10 +237,13 @@ The application is fully responsive and optimized for:
 2. Set environment variables
 3. Deploy with Git
 
-### Frontend Deployment (Netlify/Vercel)
-1. Build the React app
-2. Deploy to your preferred platform
-3. Configure environment variables
+### Frontend Deployment (Netlify)
+1. Build the React app: `npm run build`
+2. Deploy to Netlify:
+   - Connect your GitHub repository to Netlify
+   - Set build command: `npm run build`
+   - Set publish directory: `dist`
+   - Configure environment variables in Netlify dashboard
 
 ### Database (MongoDB Atlas)
 1. Create a MongoDB Atlas cluster

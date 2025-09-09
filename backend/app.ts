@@ -14,6 +14,7 @@ export const app = express()
 
 app.use(helmet())
 app.use(compression())
+app.set('trust proxy', true)
 
 const isProduction = (process.env.NODE_ENV || 'development') === 'production'
 const limiter = rateLimit({
