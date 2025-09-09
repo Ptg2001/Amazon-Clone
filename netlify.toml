@@ -23,7 +23,26 @@
   included_files = [
     "backend/dist/**"
   ]
-  node_bundler = "none"
+  node_bundler = "esbuild"
+  external_node_modules = [
+    "express",
+    "serverless-http",
+    "mongoose",
+    "cors",
+    "helmet",
+    "compression",
+    "express-rate-limit",
+    "express-validator",
+    "jsonwebtoken",
+    "bcryptjs",
+    "cloudinary",
+    "multer",
+    "nodemailer",
+    "pdfkit",
+    "razorpay",
+    "stripe",
+    "dotenv"
+  ]
 
 [dev]
   command = "npm run dev"
