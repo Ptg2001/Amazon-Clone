@@ -58,18 +58,18 @@ const connectToDatabase = async () => {
   return cachedConnection;
 };
 
-// Routes
-app.use('/.netlify/functions/server/api/auth', authRoutes);
-app.use('/.netlify/functions/server/api/users', userRoutes);
-app.use('/.netlify/functions/server/api/products', productRoutes);
-app.use('/.netlify/functions/server/api/categories', categoryRoutes);
-app.use('/.netlify/functions/server/api/orders', orderRoutes);
-app.use('/.netlify/functions/server/api/payments', paymentRoutes);
-app.use('/.netlify/functions/server/api/admin', adminRoutes);
-app.use('/.netlify/functions/server/api/cart', cartRoutes);
+// Routes (Netlify redirect already sends /api/* to this function)
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Health check
-app.get('/.netlify/functions/server/api/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(), 
