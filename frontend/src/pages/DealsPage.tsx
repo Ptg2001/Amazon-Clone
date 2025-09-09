@@ -4,6 +4,7 @@ import { useQuery } from 'react-query';
 import productAPI from '../services/productAPI';
 import LoadingSkeleton from '../components/ui/LoadingSkeleton';
 import { Link } from 'react-router-dom';
+import ProductCard from '../components/products/ProductCard';
 
 const DealsPage = () => {
   const { data, isLoading } = useQuery(
@@ -26,9 +27,9 @@ const DealsPage = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Today’s Deals</h1>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[...Array(9)].map((_, index) => (
-                <LoadingSkeleton key={index} height="300px" />
+                <LoadingSkeleton key={index} height="240px" />
               ))}
             </div>
           ) : deals.length === 0 ? (
@@ -37,22 +38,9 @@ const DealsPage = () => {
               <Link to="/products" className="mt-4 inline-block bg-amazon-orange text-white px-6 py-2 rounded-md hover:bg-orange-600 transition-colors">Browse Products</Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {deals.map((product) => (
-                <Link key={product._id} to={`/product/${product._id}`} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 group">
-                  <div className="relative aspect-square overflow-hidden">
-                    <img src={product.images?.[0]?.url || '/images/placeholder.jpg'} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%</div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2">{product.title}</h3>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-lg font-bold text-amazon-orange">${product.price?.toFixed(2)}</span>
-                      <span className="text-sm text-gray-500 line-through">${product.originalPrice?.toFixed(2)}</span>
-                    </div>
-                    <p className="text-sm text-green-600 font-medium">Save ${(product.originalPrice - product.price).toFixed(2)}</p>
-                  </div>
-                </Link>
+                <ProductCard key={product._id} product={product} />
               ))}
             </div>
           )}
