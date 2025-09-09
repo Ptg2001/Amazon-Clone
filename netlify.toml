@@ -23,6 +23,7 @@
   included_files = [
     "backend/dist/**"
   ]
+  node_bundler = "none"
 
 [dev]
   command = "npm run dev"

@@ -9,7 +9,7 @@ require('dotenv').config();
 
 // Import route handlers from compiled backend (built during Netlify build)
 const path = require('path');
-const distRoot = path.resolve(__dirname, '../../backend/dist');
+const distRoot = path.resolve(__dirname, './backend-dist');
 const authRoutes = require(path.join(distRoot, 'routes/auth'));
 const userRoutes = require(path.join(distRoot, 'routes/users'));
 const productRoutes = require(path.join(distRoot, 'routes/products'));
