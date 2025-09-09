@@ -96,12 +96,14 @@ const ProductCard = ({ product }) => {
     >
       <Link to={`/product/${product._id}`} className="flex flex-col h-full">
         {/* Product Image */}
-        <div className="relative aspect-square overflow-hidden">
+        <div className="relative aspect-[4/3] overflow-hidden bg-white flex items-center justify-center">
           <LazyLoadImage
             src={product.images?.[imageIndex]?.url || '/images/placeholder.jpg'}
             alt={product.title}
             effect="blur"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            width={600}
+            height={450}
+            className="w-full h-full object-contain"
             placeholderSrc="/images/placeholder.jpg"
           />
           
@@ -145,30 +147,32 @@ const ProductCard = ({ product }) => {
 
         {/* Product Info */}
         <div className="p-4 flex flex-col flex-1">
-          {/* Brand */}
-          {product.brand && (
-            <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
-          )}
+          {/* Brand + Title block with fixed height for alignment */}
+          <div className="mb-2 min-h-[56px]">
+            {product.brand && (
+              <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
+            )}
+            <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
+              {product.title}
+            </h3>
+          </div>
 
-          {/* Title */}
-          <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 min-h-[40px]">
-            {product.title}
-          </h3>
-
-          {/* Rating */}
-          {product.ratings?.average > 0 && (
-            <div className="flex items-center space-x-1 mb-2">
-              <div className="flex items-center">
-                {renderStars(product.ratings.average)}
+          {/* Rating placeholder with fixed height to avoid shifting */}
+          <div className="mb-2 h-5">
+            {product.ratings?.average > 0 && (
+              <div className="flex items-center space-x-1">
+                <div className="flex items-center">
+                  {renderStars(product.ratings.average)}
+                </div>
+                <span className="text-xs text-gray-500">
+                  ({product.ratings.count})
+                </span>
               </div>
-              <span className="text-xs text-gray-500">
-                ({product.ratings.count})
-              </span>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Price */}
-          <div className="flex items-center space-x-2 mb-3">
+          {/* Price with fixed row height for alignment */}
+          <div className="flex items-baseline space-x-2 mb-2 h-6">
             <span className="text-lg font-bold text-amazon-orange">
               {formatPrice(product.price)}
             </span>

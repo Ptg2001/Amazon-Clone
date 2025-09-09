@@ -24,7 +24,7 @@ const HomePage = () => {
   // Fetch categories
   const { data: categories, isLoading: categoriesLoading } = useQuery(
     'home-categories',
-    () => productAPI.getCategories({ limit: 6 }),
+    () => productAPI.getCategories({ limit: 8 }),
     {
       staleTime: 10 * 60 * 1000, // 10 minutes
     }
@@ -67,12 +67,44 @@ const HomePage = () => {
         <div className="bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <PromoRowGrid
-              cards={[
-                { title: 'Revamp your home in style', image: '/images/hero-1.jpg', cta: { label: 'Explore all', to: '/search?q=home' } },
-                { title: 'Appliances for your home | Up to 55% off', image: '/images/hero-2.jpg', cta: { label: 'Shop now', to: '/search?q=appliances' } },
-                { title: 'Starting ₹149 | Headphones', image: '/images/hero-3.jpg', cta: { label: 'See more', to: '/search?q=headphones' } },
-                { title: 'Sign in for your best experience', subtitle: 'Personalized recommendations', image: '/images/hero-1.jpg', cta: { label: 'Sign in securely', to: '/login' } },
-              ]}
+              cards={(() => {
+                const cats = categories?.data?.data?.categories || [];
+                const prods = featuredProducts?.data?.data?.products || [];
+
+                const catCards = cats.slice(0, 3).map((c) => ({
+                  title: c.name,
+                  subtitle: 'Explore top picks in this category',
+                  image: c.image?.url || '/images/category-placeholder.jpg',
+                  to: `/category/${c.slug}`,
+                  cta: { label: 'Shop now', to: `/category/${c.slug}` },
+                }));
+
+                const featured = prods[0];
+                const featuredCard = featured
+                  ? {
+                      title: featured.title,
+                      subtitle: 'Featured pick just for you',
+                      image: featured.images?.[0]?.url || '/images/placeholder.jpg',
+                      to: `/product/${featured._id}`,
+                      cta: { label: 'View product', to: `/product/${featured._id}` },
+                    }
+                  : undefined;
+
+                const cards = featuredCard ? [...catCards, featuredCard] : catCards;
+
+                // Fallback: if not enough data, pad with generic links so layout remains consistent
+                while (cards.length < 4) {
+                  cards.push({
+                    title: 'Discover more',
+                    subtitle: 'Find new deals and categories',
+                    image: '/images/hero-1.jpg',
+                    to: '/products',
+                    cta: { label: 'Explore all', to: '/products' },
+                  });
+                }
+
+                return cards.slice(0, 4);
+              })()}
             />
           </div>
         </div>

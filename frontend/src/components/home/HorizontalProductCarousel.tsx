@@ -14,10 +14,10 @@ const HorizontalProductCarousel = ({ title, products = [], viewAllLink }) => {
             <Link to={viewAllLink} className="text-sm text-amazon-orange hover:underline">See more</Link>
           )}
         </div>
-        <div className="px-4 sm:px-6 lg:px-8 pb-4 overflow-x-auto">
-          <div className="grid grid-flow-col auto-cols-[minmax(240px,1fr)] gap-4">
+        <div className="px-4 sm:px-6 lg:px-8 pb-4 overflow-x-auto snap-x snap-mandatory">
+          <div className="grid grid-flow-col auto-cols-[minmax(180px,1fr)] sm:auto-cols-[minmax(220px,1fr)] md:auto-cols-[minmax(240px,1fr)] gap-3 sm:gap-4">
             {products.map((p) => (
-              <div key={p._id} className="w-60">
+              <div key={p._id} className="snap-start">
                 <ProductCard product={p} />
               </div>
             ))}

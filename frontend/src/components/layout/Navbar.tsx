@@ -95,7 +95,7 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left Side - Logo and Delivery */}
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-4 sm:gap-8">
               {/* Amazon Logo */}
               <Link to="/" className="flex items-center">
                 <div className="relative">
@@ -115,7 +115,7 @@ const Navbar = () => {
               </Link>
               
               {/* Delivery Location */}
-              <div className="relative country-dropdown">
+              <div className="relative country-dropdown hidden sm:block">
                 <button
                   onClick={toggleCountryDropdown}
                   className="flex items-center space-x-1 hover:text-gray-300 transition-colors"
@@ -156,12 +156,12 @@ const Navbar = () => {
             </div>
 
             {/* Center - Search Bar */}
-            <div className="flex-1 max-w-2xl mx-4 hidden md:block">
+            <div className="flex-1 max-w-2xl mx-2 sm:mx-4 hidden md:block">
               <SearchBar />
             </div>
 
             {/* Right Side - User Menu, Cart, etc. */}
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3 sm:gap-8">
               {/* Mobile Search Button */}
               <button
                 onClick={toggleSearch}
@@ -177,8 +177,19 @@ const Navbar = () => {
                 <FiChevronDown className="h-3 w-3" />
               </div>
 
-              {/* User Menu */}
-              <UserMenu user={user} isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+              {/* Desktop User Menu */}
+              <div className="hidden md:block">
+                <UserMenu user={user} isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+              </div>
+
+              {/* Mobile Account shortcut */}
+              <button
+                onClick={() => navigate(isAuthenticated ? '/profile' : '/login')}
+                className="md:hidden p-2 text-white hover:text-gray-300 transition-colors"
+                aria-label="Account"
+              >
+                <FiUser className="h-6 w-6" />
+              </button>
 
               {/* Returns & Orders */}
               <button
@@ -312,8 +323,8 @@ const Navbar = () => {
 
       {/* Secondary Navigation Bar - Amazon Blue */}
       <div className="bg-amazon-blue text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-8 py-2">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-4 sm:gap-8 py-2 overflow-x-auto no-scrollbar">
             {/* All Menu */}
             <button className="flex items-center space-x-1 hover:text-gray-300 transition-colors border border-transparent hover:border-white px-2 py-1">
               <FiMenu className="h-4 w-4" />

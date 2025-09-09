@@ -224,10 +224,10 @@ const AdminProducts = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                       Stock
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -259,23 +259,23 @@ const AdminProducts = () => {
                               )}
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-gray-900 max-w-[80px] truncate" title={product.title}>
-                                {product.title?.length > 4 ? `${product.title.slice(0, 4)}…` : product.title}
+                              <div className="text-sm font-medium text-gray-900 max-w-[140px] sm:max-w-[220px] truncate" title={product.title}>
+                                {product.title}
                               </div>
-                              <div className="text-sm text-gray-500">ID: {product._id.slice(-8)}</div>
                               {product.brand && (
                                 <div className="text-xs text-gray-400">{product.brand}</div>
                               )}
+                              <div className="text-xs text-gray-500 hidden sm:block">ID: {product._id.slice(-8)}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           ${product.price}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
                           {product.inventory?.quantity || 0}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             product.isActive 
                               ? 'bg-green-100 text-green-800' 

@@ -31,9 +31,9 @@ const ProductsPage = () => {
           </h1>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {[...Array(8)].map((_, index) => (
-                <LoadingSkeleton key={index} height="300px" />
+                <LoadingSkeleton key={index} height="240px" />
               ))}
             </div>
           ) : products.length === 0 ? (
@@ -41,7 +41,7 @@ const ProductsPage = () => {
               <p className="text-gray-500 text-lg">No products found.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {products.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}

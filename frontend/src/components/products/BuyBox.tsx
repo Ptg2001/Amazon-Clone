@@ -24,26 +24,8 @@ const BuyBox = ({ product, selectedVariant }: { product: any; selectedVariant?: 
   }, [deliveryDays]);
 
   const handleAddToCart = async (goCheckout?: boolean) => {
-    if (!isAuthenticated) {
-      toast.error('Please sign in to add items to cart');
-      return;
-    }
     try {
       const variant = selectedVariant && Object.keys(selectedVariant).length > 0 ? selectedVariant : ((product as any).selectedVariations || null);
-
-      // Require choosing all options if the product has variants
-      const rawList: any[] = (Array.isArray(product.variations) && product.variations.length
-        ? product.variations
-        : (Array.isArray(product.variants) ? product.variants : [])) as any[];
-      const requiredNames = (rawList || []).map((v) => (v?.name || '').toString()).filter(Boolean);
-      if (requiredNames.length > 0) {
-        const chosen = variant || {};
-        const missing = requiredNames.filter((n) => !(n in chosen));
-        if (missing.length > 0) {
-          toast.error(`Please select: ${missing.join(', ')}`);
-          return;
-        }
-      }
       await cartAPI.addItem(product._id, quantity, variant);
       const res = await cartAPI.getCart();
       dispatch(setCartFromServer(res?.data?.data?.cart));
@@ -101,7 +83,6 @@ const BuyBox = ({ product, selectedVariant }: { product: any; selectedVariant?: 
             <select
               value={quantity}
               onChange={(e) => setQuantity(parseInt(e.target.value))}
-              disabled={!isInStock}
               className="w-full h-10 border border-gray-300 rounded-md px-3 pr-8 bg-white focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-amazon-orange"
             >
               {/* Collapsed label mimic */}
@@ -115,22 +96,16 @@ const BuyBox = ({ product, selectedVariant }: { product: any; selectedVariant?: 
           </div>
 
           <button
-            disabled={!isInStock}
             onClick={() => handleAddToCart(false)}
-            className={`w-full flex items-center justify-center space-x-2 rounded-md py-3 ${
-              isInStock ? 'bg-amazon-orange text-white hover:bg-orange-600' : 'bg-gray-200 text-gray-500'
-            }`}
+            className={`w-full flex items-center justify-center space-x-2 rounded-md py-3 bg-amazon-orange text-white hover:bg-orange-600`}
           >
             <FiShoppingCart />
             <span>Add to Cart</span>
           </button>
 
           <button
-            disabled={!isInStock}
             onClick={() => handleAddToCart(true)}
-            className={`w-full rounded-md py-3 text-white ${
-              isInStock ? 'bg-orange-500 hover:bg-orange-600' : 'bg-gray-300'
-            }`}
+            className={`w-full rounded-md py-3 text-white bg-orange-500 hover:bg-orange-600`}
           >
             Buy Now
           </button>

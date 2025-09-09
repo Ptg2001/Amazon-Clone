@@ -108,7 +108,7 @@ const SearchBar = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-gray-100 border border-gray-300 rounded-l-md px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-transparent min-w-[120px]"
+            className="bg-gray-100 border border-gray-300 rounded-l-md px-2 sm:px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-transparent min-w-[90px] sm:min-w-[120px]"
           >
             <option value="all">All</option>
             {topLevelCategories.map((cat) => (
@@ -125,7 +125,7 @@ const SearchBar = () => {
               onFocus={handleFocus}
               onBlur={handleBlur}
               placeholder="Search Amazon"
-              className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-transparent bg-white text-gray-900 placeholder-gray-500"
+              className="w-full px-3 sm:px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-transparent bg-white text-gray-900 placeholder-gray-500"
             />
             
             {/* Clear Button */}

@@ -26,18 +26,19 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/cart/items - add item
-router.post('/items', [
-  body('product').isMongoId().withMessage('Valid product ID is required'),
-  body('quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
-  body('variant').optional().isObject(),
-], handleValidationErrors, async (req, res) => {
+// POST /api/cart/items - add item (relaxed validation)
+router.post('/items', async (req, res) => {
   try {
-    const { product: productId, quantity, variant } = req.body;
+    const { product: productId, quantity, variant } = req.body || {};
+
+    if (!productId || !isValidObjectId(productId)) {
+      return res.status(400).json({ success: false, message: 'Valid product ID is required' });
+    }
+
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
-    if (!product.isActive) return res.status(400).json({ success: false, message: 'Product is inactive' });
-    if (product.inventory.quantity < quantity) return res.status(400).json({ success: false, message: 'Insufficient stock' });
+
+    const qty = Math.max(1, parseInt(quantity as any, 10) || 1);
 
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) cart = await Cart.create({ user: req.user._id, items: [] });
@@ -45,9 +46,9 @@ router.post('/items', [
     const key = JSON.stringify(variant || null);
     const existing = cart.items.find(i => i.product.toString() === productId && JSON.stringify(i.variant || null) === key);
     if (existing) {
-      existing.quantity += quantity;
+      existing.quantity += qty;
     } else {
-      cart.items.push({ product: product._id, quantity, variant: variant || null, price: product.price });
+      cart.items.push({ product: product._id, quantity: qty, variant: variant || null, price: product.price });
     }
     await cart.save();
     await cart.populate('items.product', 'title images brand price inventory');
@@ -58,14 +59,11 @@ router.post('/items', [
   }
 });
 
-// PUT /api/cart/items/:productId - update quantity
-router.put('/items/:productId', [
-  body('quantity').isInt({ min: 0 }).withMessage('Quantity must be >= 0'),
-  body('variant').optional().isObject(),
-], handleValidationErrors, async (req, res) => {
+// PUT /api/cart/items/:productId - update quantity (relaxed validation)
+router.put('/items/:productId', async (req, res) => {
   try {
     const { productId } = req.params;
-    const { quantity, variant } = req.body;
+    const { quantity, variant } = req.body || {};
     if (!isValidObjectId(productId)) return res.status(400).json({ success: false, message: 'Invalid product ID' });
 
     const cart = await Cart.findOne({ user: req.user._id });
@@ -75,10 +73,11 @@ router.put('/items/:productId', [
     const idx = cart.items.findIndex(i => i.product.toString() === productId && JSON.stringify(i.variant || null) === key);
     if (idx === -1) return res.status(404).json({ success: false, message: 'Item not found in cart' });
 
-    if (quantity <= 0) {
+    const qty = Math.max(0, parseInt(quantity as any, 10) || 0);
+    if (qty <= 0) {
       cart.items.splice(idx, 1);
     } else {
-      cart.items[idx].quantity = quantity;
+      cart.items[idx].quantity = qty;
     }
     await cart.save();
     await cart.populate('items.product', 'title images brand price inventory');
