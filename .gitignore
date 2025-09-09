@@ -101,6 +101,7 @@ Thumbs.db
 
 # Netlify
 .netlify/
+netlify/functions/node_modules/
 
 # Vercel (keeping this for reference but should be empty now)
 .vercel/

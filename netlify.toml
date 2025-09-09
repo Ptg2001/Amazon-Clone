@@ -1,17 +1,27 @@
 [build]
-  base = "frontend"
-  publish = "dist"
-  command = "npm run build"
+  base = "."
+  publish = "frontend/dist"
+  command = "cd frontend && npm run build"
 
 [build.environment]
   NODE_VERSION = "18"
 
+# API redirects to Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/server/api/:splat"
+  status = 200
+
+# SPA redirects
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+[functions]
+  directory = "netlify/functions"
+
 [dev]
   command = "npm run dev"
   port = 3000
-  publish = "dist"
+  publish = "frontend/dist"

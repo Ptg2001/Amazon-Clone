@@ -114,8 +114,10 @@ A full-stack Amazon clone built with the MERN stack (MongoDB, Express.js, React,
 2. **Environment Configuration**
    Create a `.env` file in the frontend directory:
    ```env
-   REACT_APP_API_URL=http://localhost:5000/api
-   REACT_APP_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
+   VITE_API_URL=http://localhost:5000/api
+   VITE_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
+   VITE_APP_NAME=AmazonVirtua
+   VITE_NODE_ENV=development
    ```
 
 3. **Start the frontend development server**
