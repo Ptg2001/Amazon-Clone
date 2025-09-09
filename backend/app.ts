@@ -25,9 +25,27 @@ if (isProduction) {
   app.use(limiter)
 }
 
+// CORS: allow live URL, optional additional origins, and Netlify previews
+const allowedOriginsEnv = (process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
+const defaultAllowed = [
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+]
+
+const netlifyPreviewRegex = /^(https?:\/\/)?[a-z0-9-]+--[a-z0-9-]+\.netlify\.app$/i
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true)
+      if (defaultAllowed.includes(origin)) return callback(null, true)
+      if (allowedOriginsEnv.includes(origin)) return callback(null, true)
+      if (netlifyPreviewRegex.test(origin)) return callback(null, true)
+      return callback(new Error('Not allowed by CORS'))
+    },
     credentials: true,
   }),
 )
