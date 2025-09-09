@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from '../store/slices/authSlice';
+import { loadWishlist } from '../store/slices/wishlistSlice';
 
 type AuthContextValue = {
   user: any;
@@ -29,6 +30,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       dispatch(getCurrentUser());
     }
   }, [dispatch, user]);
+
+  // Load wishlist when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      dispatch(loadWishlist());
+    }
+  }, [dispatch, isAuthenticated, user]);
 
   const value: AuthContextValue = {
     user,

@@ -36,7 +36,7 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  const handleWishlistToggle = (e) => {
+  const handleWishlistToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -45,12 +45,19 @@ const ProductCard = ({ product }) => {
       return;
     }
 
-    if (isInWishlist) {
-      dispatch(removeFromWishlist(product._id));
-      toast.success('Removed from wishlist');
-    } else {
-      dispatch(addToWishlist(product));
-      toast.success('Added to wishlist');
+    try {
+      if (isInWishlist) {
+        await cartAPI.removeFromWishlist(product._id);
+        dispatch(removeFromWishlist(product._id));
+        toast.success('Removed from wishlist');
+      } else {
+        await cartAPI.addToWishlist(product._id);
+        dispatch(addToWishlist(product));
+        toast.success('Added to wishlist');
+      }
+    } catch (error) {
+      console.error('Wishlist error:', error);
+      toast.error('Failed to update wishlist');
     }
   };
 
@@ -88,6 +95,21 @@ const ProductCard = ({ product }) => {
     return stars;
   };
 
+  const truncatedTitle = typeof product.title === 'string' ? product.title.slice(0, 60) : '';
+
+  const hasValidOriginal = typeof product.originalPrice === 'number' && product.originalPrice > product.price;
+  const percentFromOriginal = hasValidOriginal ? Math.round((1 - (product.price / product.originalPrice)) * 100) : 0;
+  const percentFromDiscountField = typeof product.discount === 'number' && product.discount > 0 ? Math.round(product.discount) : 0;
+  const computedDiscountPercent = percentFromDiscountField || percentFromOriginal;
+
+  // If there is a percent but no original price, derive a pseudo original for UI
+  const pseudoOriginal = !hasValidOriginal && percentFromDiscountField > 0
+    ? parseFloat((product.price / (1 - percentFromDiscountField / 100)).toFixed(2))
+    : null;
+
+  const displayOriginal = hasValidOriginal ? product.originalPrice : (pseudoOriginal ?? null);
+  const savingsAmount = displayOriginal ? Math.max(0, displayOriginal - product.price) : 0;
+
   return (
     <div
       className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 group h-full"
@@ -96,14 +118,14 @@ const ProductCard = ({ product }) => {
     >
       <Link to={`/product/${product._id}`} className="flex flex-col h-full">
         {/* Product Image */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-white flex items-center justify-center">
+        <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 flex items-center justify-center min-h-[160px]">
           <LazyLoadImage
             src={product.images?.[imageIndex]?.url || '/images/placeholder.jpg'}
             alt={product.title}
             effect="blur"
-            width={600}
-            height={450}
-            className="w-full h-full object-contain"
+            width={400}
+            height={300}
+            className="w-full h-full object-contain p-2"
             placeholderSrc="/images/placeholder.jpg"
           />
           
@@ -126,9 +148,9 @@ const ProductCard = ({ product }) => {
           )}
 
           {/* Discount Badge */}
-          {product.discount > 0 && (
+          {computedDiscountPercent > 0 && (
             <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-              -{product.discount}%
+              -{computedDiscountPercent}%
             </div>
           )}
 
@@ -137,23 +159,23 @@ const ProductCard = ({ product }) => {
             onClick={handleWishlistToggle}
             className={`absolute top-2 right-2 p-2 rounded-full transition-all duration-200 ${
               isInWishlist
-                ? 'bg-red-500 text-white'
+                ? 'bg-white text-red-500'
                 : 'bg-white bg-opacity-80 text-gray-600 hover:bg-opacity-100'
             }`}
           >
-            <FiHeart className={`h-4 w-4 ${isInWishlist ? 'fill-current' : ''}`} />
+            <FiHeart className={`h-4 w-4 ${isInWishlist ? 'fill-current' : ''}`} style={{ color: isInWishlist ? '#ef4444' : 'inherit' }} />
           </button>
         </div>
 
         {/* Product Info */}
         <div className="p-4 flex flex-col flex-1">
           {/* Brand + Title block with fixed height for alignment */}
-          <div className="mb-2 min-h-[56px]">
+          <div className="mb-2 min-h-[44px]">
             {product.brand && (
-              <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
+              <p className="text-xs text-gray-500 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">{product.brand}</p>
             )}
-            <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
-              {product.title}
+            <h3 className="text-sm font-medium text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis" title={product.title}>
+              {truncatedTitle}
             </h3>
           </div>
 
@@ -172,16 +194,25 @@ const ProductCard = ({ product }) => {
           </div>
 
           {/* Price with fixed row height for alignment */}
-          <div className="flex items-baseline space-x-2 mb-2 h-6">
+          <div className="flex items-baseline space-x-2 mb-1 h-6">
             <span className="text-lg font-bold text-amazon-orange">
               {formatPrice(product.price)}
             </span>
-            {product.originalPrice && product.originalPrice > product.price && (
+            {displayOriginal && displayOriginal > product.price && (
               <span className="text-sm text-gray-500 line-through">
-                {formatPrice(product.originalPrice)}
+                {formatPrice(displayOriginal)}
               </span>
             )}
           </div>
+
+          {/* Savings row */}
+          {computedDiscountPercent > 0 && savingsAmount > 0 && (
+            <div className="mb-2 -mt-1 h-5">
+              <span className="text-xs text-green-700 font-medium">
+                Save {formatPrice(savingsAmount)} ({computedDiscountPercent}%)
+              </span>
+            </div>
+          )}
 
           {/* Add to Cart Button */}
           <button

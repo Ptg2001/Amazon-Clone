@@ -54,7 +54,7 @@ const UserMenu = ({ user, isAuthenticated, onLogout }) => {
                 <div className="text-sm font-semibold text-gray-900 mb-2">Your Lists</div>
                 <div className="space-y-1">
                   <Link to="/wishlist" className="block text-sm text-gray-700 hover:text-amazon-orange" onClick={() => setIsOpen(false)}>
-                    Create a Wish List
+                    Your Wishlist
                   </Link>
                   <Link to="/lists" className="block text-sm text-gray-700 hover:text-amazon-orange" onClick={() => setIsOpen(false)}>
                     Find a List or Registry
@@ -136,7 +136,7 @@ const UserMenu = ({ user, isAuthenticated, onLogout }) => {
                   className="block text-sm text-gray-700 hover:text-amazon-orange"
                   onClick={() => setIsOpen(false)}
                 >
-                  Create a Wish List
+                  Your Wishlist
                 </Link>
                 <Link
                   to="/lists"

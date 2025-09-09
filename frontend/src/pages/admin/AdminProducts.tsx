@@ -27,6 +27,8 @@ const AdminProducts = () => {
   const [form, setForm] = useState({
     title: '',
     price: 0,
+    originalPrice: 0,
+    discount: 0,
     quantity: 0,
     isActive: true,
     featuresText: '',
@@ -59,6 +61,8 @@ const AdminProducts = () => {
     setForm({
       title: product.title || '',
       price: product.price || 0,
+      originalPrice: product.originalPrice || 0,
+      discount: product.discount || 0,
       quantity: product.inventory?.quantity || 0,
       isActive: product.isActive !== false,
       featuresText: (product.features || []).join('\n'),
@@ -85,40 +89,40 @@ const AdminProducts = () => {
   const submitEdit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
-    updateMutation.mutate({
-      id: editingProduct._id,
-      payload: {
-        title: form.title,
-        price: form.price,
-        inventory: { quantity: form.quantity },
-        isActive: form.isActive,
-        features: (form.featuresText || '').split('\n').map(s => s.trim()).filter(Boolean),
-        attributes: (() => {
-          const map: Record<string,string> = {};
-          (form.attributesText || '').split('\n').forEach((raw) => {
-            const line = raw.trim();
-            if (!line) return;
-            const idx = line.indexOf(':');
-            if (idx > -1) {
-              const k = line.slice(0, idx).trim();
-              const v = line.slice(idx + 1).trim();
-              if (k && v) map[k] = v;
-            }
-          });
-          return map;
-        })(),
-        images: (form.imagesText || '').split('\n').map((u) => ({ url: u.trim() })).filter((i) => i.url && i.url.startsWith('http')),
-        variants: (form.variationsText || '').split('\n').map((raw) => {
+    const payload: any = {
+      title: form.title,
+      price: form.price,
+      inventory: { quantity: form.quantity },
+      isActive: form.isActive,
+      features: (form.featuresText || '').split('\n').map(s => s.trim()).filter(Boolean),
+      attributes: (() => {
+        const map: Record<string,string> = {};
+        (form.attributesText || '').split('\n').forEach((raw) => {
           const line = raw.trim();
-          if (!line) return null as any;
-          const [namePart, optsPart] = line.split('|');
-          const name = (namePart || '').trim();
-          const options = (optsPart || '').split(',').map((s) => s.trim()).filter(Boolean);
-          if (!name || options.length === 0) return null as any;
-          return { name, options } as any;
-        }).filter(Boolean),
-      },
-    });
+          if (!line) return;
+          const idx = line.indexOf(':');
+          if (idx > -1) {
+            const k = line.slice(0, idx).trim();
+            const v = line.slice(idx + 1).trim();
+            if (k && v) map[k] = v;
+          }
+        });
+        return map;
+      })(),
+      images: (form.imagesText || '').split('\n').map((u) => ({ url: u.trim() })).filter((i) => i.url && i.url.startsWith('http')),
+      variants: (form.variationsText || '').split('\n').map((raw) => {
+        const line = raw.trim();
+        if (!line) return null as any;
+        const [namePart, optsPart] = line.split('|');
+        const name = (namePart || '').trim();
+        const options = (optsPart || '').split(',').map((s) => s.trim()).filter(Boolean);
+        if (!name || options.length === 0) return null as any;
+        return { name, options } as any;
+      }).filter(Boolean),
+    };
+    if (form.originalPrice && form.originalPrice > 0) payload.originalPrice = form.originalPrice;
+    if (form.discount && form.discount > 0) payload.discount = form.discount;
+    updateMutation.mutate({ id: editingProduct._id, payload });
   };
 
   const handleDelete = (product: any) => {
@@ -270,7 +274,24 @@ const AdminProducts = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ${product.price}
+                          {(() => {
+                            const d = typeof product.discount === 'number' && product.discount > 0 ? Math.round(product.discount) : 0;
+                            const displayOriginal = (typeof product.originalPrice === 'number' && product.originalPrice > 0)
+                              ? product.originalPrice
+                              : (d > 0 ? parseFloat((product.price / (1 - d / 100)).toFixed(2)) : 0);
+                            const showCross = displayOriginal > product.price;
+                            return showCross ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 line-through">${displayOriginal}</span>
+                                <span>${product.price}</span>
+                                {d > 0 ? (
+                                  <span className="text-xs text-red-600 font-semibold">-{d}%</span>
+                                ) : null}
+                              </div>
+                            ) : (
+                              <span>${product.price}</span>
+                            );
+                          })()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
                           {product.inventory?.quantity || 0}
@@ -345,6 +366,28 @@ const AdminProducts = () => {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Original Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="input-amazon"
+                    value={form.originalPrice}
+                    onChange={(e) => setForm({ ...form, originalPrice: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Discount (%)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="0"
+                    max="100"
+                    className="input-amazon"
+                    value={form.discount}
+                    onChange={(e) => setForm({ ...form, discount: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
                   <input
                     type="number"
@@ -352,6 +395,37 @@ const AdminProducts = () => {
                     value={form.quantity}
                     onChange={(e) => setForm({ ...form, quantity: parseInt(e.target.value) || 0 })}
                   />
+                </div>
+                {/* Price preview */}
+                <div className="sm:col-span-2 text-sm text-gray-700">
+                  {(() => {
+                    const d = Math.min(100, Math.max(0, form.discount || 0));
+                    const hasOrig = form.originalPrice && form.originalPrice > 0;
+                    const hasPrice = form.price && form.price > 0;
+                    let derivedPrice = 0;
+                    let derivedOrig = 0;
+                    if (d > 0 && hasOrig && !hasPrice) {
+                      derivedPrice = parseFloat((form.originalPrice * (1 - d / 100)).toFixed(2));
+                    } else if (d > 0 && hasPrice && !hasOrig) {
+                      derivedOrig = parseFloat((form.price / (1 - d / 100)).toFixed(2));
+                    }
+                    return (
+                      <div className="rounded bg-gray-50 border border-gray-200 p-2">
+                        <div className="font-medium text-gray-800 mb-1">Pricing preview</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500 line-through">
+                            ${(hasOrig ? form.originalPrice : (derivedOrig || 0)) || 0}
+                          </span>
+                          <span>
+                            ${(hasPrice ? form.price : (derivedPrice || 0)) || 0}
+                          </span>
+                          {d > 0 ? (
+                            <span className="text-xs text-red-600 font-semibold">-{d}%</span>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
                 <div className="flex items-center space-x-3">
                   <label className="inline-flex items-center space-x-2">

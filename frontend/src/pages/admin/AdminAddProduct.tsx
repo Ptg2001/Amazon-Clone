@@ -20,6 +20,8 @@ const AdminAddProduct = () => {
     description: '',
     features: '',
     price: '',
+    originalPrice: '',
+    discount: '',
     category: '',
     brand: '',
     model: '',
@@ -76,7 +78,7 @@ const AdminAddProduct = () => {
         }
       }
 
-      const payload = {
+      const payload: any = {
         title: form.title,
         description: form.description,
         features: form.features
@@ -86,6 +88,8 @@ const AdminAddProduct = () => {
               .filter(Boolean)
           : [],
         price: parseFloat(form.price),
+        ...(form.originalPrice ? { originalPrice: parseFloat(form.originalPrice) } : {}),
+        ...(form.discount ? { discount: parseFloat(form.discount) } : {}),
         category: form.category,
         brand: form.brand,
         model: form.model,
@@ -280,6 +284,44 @@ const AdminAddProduct = () => {
               </div>
             </div>
 
+            {/* Discount controls */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Original Price ($)</label>
+                <input name="originalPrice" type="number" step="0.01" value={form.originalPrice} onChange={onChange} className="w-full border border-gray-300 rounded-md px-3 py-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Discount (%)</label>
+                <input name="discount" type="number" min="0" max="100" step="1" value={form.discount} onChange={onChange} className="w-full border border-gray-300 rounded-md px-3 py-2" />
+              </div>
+              <div className="flex items-end">
+                <div className="rounded bg-gray-50 border border-gray-200 p-3 w-full text-sm text-gray-700">
+                  {(() => {
+                    const price = parseFloat(form.price || '0') || 0;
+                    const orig = parseFloat(form.originalPrice || '0') || 0;
+                    const d = Math.min(100, Math.max(0, parseFloat(form.discount || '0') || 0));
+                    const hasPrice = price > 0;
+                    const hasOrig = orig > 0;
+                    let displayPrice = price;
+                    let displayOrig = orig;
+                    if (d > 0 && hasOrig && !hasPrice) {
+                      displayPrice = parseFloat((orig * (1 - d / 100)).toFixed(2));
+                    } else if (d > 0 && hasPrice && !hasOrig) {
+                      displayOrig = parseFloat((price / (1 - d / 100)).toFixed(2));
+                    }
+                    return (
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium text-gray-800">Preview:</span>
+                        <span className="text-gray-500 line-through">${(displayOrig || 0).toFixed(2)}</span>
+                        <span>${(displayPrice || 0).toFixed(2)}</span>
+                        {d > 0 ? <span className="text-xs text-red-600 font-semibold">-{d}%</span> : null}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
@@ -341,7 +383,7 @@ const AdminAddProduct = () => {
                   <input name="width" value={form.width} onChange={onChange} className="w-full border border-gray-300 rounded-md px-3 py-2" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Height</label>
+                  <label className="block text_sm font-medium text-gray-700 mb-1">Height</label>
                   <input name="height" value={form.height} onChange={onChange} className="w-full border border-gray-300 rounded-md px-3 py-2" />
                 </div>
                 <div>

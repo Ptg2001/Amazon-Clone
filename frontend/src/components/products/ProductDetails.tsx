@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FiHeart, FiStar, FiTruck, FiShield, FiRotateCcw } from 'react-icons/fi';
 import { addToWishlist, removeFromWishlist } from '../../store/slices/wishlistSlice';
+import cartAPI from '../../services/cartAPI';
 import toast from 'react-hot-toast';
 import ProductImageGallery from './ProductImageGallery';
 import BuyBox from './BuyBox';
@@ -16,18 +17,25 @@ const ProductDetails = ({ product }) => {
 
   const isInWishlist = wishlist.some((item) => item._id === product._id);
 
-  const handleWishlistToggle = () => {
+  const handleWishlistToggle = async () => {
     if (!isAuthenticated) {
       toast.error('Please sign in to add items to wishlist');
       return;
     }
 
-    if (isInWishlist) {
-      dispatch(removeFromWishlist(product._id));
-      toast.success('Removed from wishlist');
-    } else {
-      dispatch(addToWishlist(product));
-      toast.success('Added to wishlist');
+    try {
+      if (isInWishlist) {
+        await cartAPI.removeFromWishlist(product._id);
+        dispatch(removeFromWishlist(product._id));
+        toast.success('Removed from wishlist');
+      } else {
+        await cartAPI.addToWishlist(product._id);
+        dispatch(addToWishlist(product));
+        toast.success('Added to wishlist');
+      }
+    } catch (error) {
+      console.error('Wishlist error:', error);
+      toast.error('Failed to update wishlist');
     }
   };
 
@@ -230,11 +238,11 @@ const ProductDetails = ({ product }) => {
               onClick={handleWishlistToggle}
               className={`px-4 py-3 rounded-md border transition-colors duration-200 inline-flex items-center justify-center gap-2 ${
                 isInWishlist
-                  ? 'bg-red-500 text-white border-red-500'
+                  ? 'bg-white text-red-500 border-red-500'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
-              <FiHeart className={`h-5 w-5 ${isInWishlist ? 'fill-current' : ''}`} />
+              <FiHeart className={`h-5 w-5 ${isInWishlist ? 'fill-current' : ''}`} style={{ color: isInWishlist ? '#ef4444' : 'inherit' }} />
               <span>{isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
             </button>
 

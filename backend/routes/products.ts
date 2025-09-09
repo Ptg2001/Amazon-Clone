@@ -256,6 +256,21 @@ router.post('/', protect, authorize('admin'), [
   try {
     const productData = req.body;
 
+    // Normalize pricing: derive price/originalPrice/discount from any two
+    if (typeof productData.discount === 'number' && productData.discount > 0) {
+      const d = Math.min(100, Math.max(0, productData.discount));
+      if (typeof productData.originalPrice === 'number' && productData.originalPrice > 0 && (productData.price === undefined || productData.price === null)) {
+        productData.price = parseFloat((productData.originalPrice * (1 - d / 100)).toFixed(2));
+      } else if (typeof productData.price === 'number' && productData.price > 0 && (productData.originalPrice === undefined || productData.originalPrice === null)) {
+        productData.originalPrice = parseFloat((productData.price / (1 - d / 100)).toFixed(2));
+      }
+    }
+    if ((productData.discount === undefined || productData.discount === null) &&
+        typeof productData.originalPrice === 'number' && typeof productData.price === 'number' &&
+        productData.originalPrice > productData.price) {
+      productData.discount = Math.round(((productData.originalPrice - productData.price) / productData.originalPrice) * 100);
+    }
+
     // Check if SKU already exists
     const existingProduct = await Product.findOne({ sku: productData.sku });
     if (existingProduct) {
@@ -336,6 +351,21 @@ router.put('/:id', protect, authorize('admin'), [
         success: false,
         message: 'Invalid product ID'
       });
+    }
+
+    // Normalize pricing: derive price/originalPrice/discount from any two
+    if (typeof updateData.discount === 'number' && updateData.discount > 0) {
+      const d = Math.min(100, Math.max(0, updateData.discount));
+      if (typeof updateData.originalPrice === 'number' && updateData.originalPrice > 0 && (updateData.price === undefined || updateData.price === null)) {
+        updateData.price = parseFloat((updateData.originalPrice * (1 - d / 100)).toFixed(2));
+      } else if (typeof updateData.price === 'number' && updateData.price > 0 && (updateData.originalPrice === undefined || updateData.originalPrice === null)) {
+        updateData.originalPrice = parseFloat((updateData.price / (1 - d / 100)).toFixed(2));
+      }
+    }
+    if ((updateData.discount === undefined || updateData.discount === null) &&
+        typeof updateData.originalPrice === 'number' && typeof updateData.price === 'number' &&
+        updateData.originalPrice > updateData.price) {
+      updateData.discount = Math.round(((updateData.originalPrice - updateData.price) / updateData.originalPrice) * 100);
     }
 
     // Check if SKU already exists (excluding current product)

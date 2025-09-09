@@ -11,6 +11,55 @@ import NewsletterSection from '../components/home/NewsletterSection';
 import HorizontalProductCarousel from '../components/home/HorizontalProductCarousel';
 import PromoRowGrid from '../components/home/PromoRowGrid';
 
+const ensureProductImage = (product) => {
+  const hasImage = Array.isArray(product.images) && product.images.length > 0 && product.images[0]?.url;
+  return {
+    ...product,
+    images: hasImage ? product.images : [{ url: '/images/placeholder.jpg', alt: product.title }],
+    price: typeof product.price === 'number' ? product.price : 0,
+    originalPrice: typeof product.originalPrice === 'number' ? product.originalPrice : undefined,
+    ratings: product.ratings || { average: 0, count: 0 },
+  };
+};
+
+const normalizeProducts = (products) => {
+  if (!Array.isArray(products)) return [];
+  return products.map(ensureProductImage);
+};
+
+const getCategoryImage = (category, products, usedProductIds: Set<string>) => {
+  if (category?.image?.url) return { url: category.image.url };
+  const prod = products.find((p) => {
+    const matches = p?.category?._id === category?._id || p?.category === category?._id || p?.category?.slug === category?.slug;
+    return matches && p?._id && !usedProductIds.has(p._id);
+  });
+  if (prod && prod._id) {
+    usedProductIds.add(prod._id);
+  }
+  return { url: prod?.images?.[0]?.url || '/images/category-placeholder.jpg' };
+};
+
+const buildUniqueCategoryCards = (categories, products, count = 4) => {
+  const used = new Set<string>();
+  const seenSlugs = new Set<string>();
+  const cards = [] as any[];
+  for (const c of categories) {
+    const slug = c?.slug || c?._id;
+    if (!slug || seenSlugs.has(slug)) continue;
+    seenSlugs.add(slug);
+    const img = getCategoryImage(c, products, used);
+    cards.push({
+      title: c.name,
+      subtitle: 'Explore top picks in this category',
+      image: img.url,
+      to: `/category/${c.slug}`,
+      cta: { label: 'Shop now', to: `/category/${c.slug}` },
+    });
+    if (cards.length >= count) break;
+  }
+  return cards;
+};
+
 const HomePage = () => {
   // Fetch featured products
   const { data: featuredProducts, isLoading: featuredLoading } = useQuery(
@@ -39,6 +88,18 @@ const HomePage = () => {
     }
   );
 
+  const featuredList = normalizeProducts(featuredProducts?.data?.data?.products || []);
+  const dealsList = normalizeProducts(deals?.data?.data?.products || []);
+  const categoriesList = categories?.data?.data?.categories || [];
+
+  // Combined list increases chance of finding category preview images
+  const productsForCategoryImages = [...featuredList, ...dealsList];
+
+  // Compute deals with an actual discount
+  const discountedProducts = dealsList.filter((p) =>
+    (typeof p.originalPrice === 'number' && p.originalPrice > p.price) || (typeof p.discount === 'number' && p.discount > 0)
+  );
+
   return (
     <>
       <Helmet>
@@ -57,8 +118,8 @@ const HomePage = () => {
         <section className="py-8 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <HomeGrid
-              featured={featuredProducts?.data?.data?.products || []}
-              categories={categories?.data?.data?.categories || []}
+              featured={productsForCategoryImages}
+              categories={categoriesList}
             />
           </div>
         </section>
@@ -67,44 +128,7 @@ const HomePage = () => {
         <div className="bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <PromoRowGrid
-              cards={(() => {
-                const cats = categories?.data?.data?.categories || [];
-                const prods = featuredProducts?.data?.data?.products || [];
-
-                const catCards = cats.slice(0, 3).map((c) => ({
-                  title: c.name,
-                  subtitle: 'Explore top picks in this category',
-                  image: c.image?.url || '/images/category-placeholder.jpg',
-                  to: `/category/${c.slug}`,
-                  cta: { label: 'Shop now', to: `/category/${c.slug}` },
-                }));
-
-                const featured = prods[0];
-                const featuredCard = featured
-                  ? {
-                      title: featured.title,
-                      subtitle: 'Featured pick just for you',
-                      image: featured.images?.[0]?.url || '/images/placeholder.jpg',
-                      to: `/product/${featured._id}`,
-                      cta: { label: 'View product', to: `/product/${featured._id}` },
-                    }
-                  : undefined;
-
-                const cards = featuredCard ? [...catCards, featuredCard] : catCards;
-
-                // Fallback: if not enough data, pad with generic links so layout remains consistent
-                while (cards.length < 4) {
-                  cards.push({
-                    title: 'Discover more',
-                    subtitle: 'Find new deals and categories',
-                    image: '/images/hero-1.jpg',
-                    to: '/products',
-                    cta: { label: 'Explore all', to: '/products' },
-                  });
-                }
-
-                return cards.slice(0, 4);
-              })()}
+              cards={buildUniqueCategoryCards(categoriesList, productsForCategoryImages, 4)}
             />
           </div>
         </div>
@@ -114,22 +138,22 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <HorizontalProductCarousel
               title="Related to items you've viewed"
-              products={(featuredProducts?.data?.data?.products || []).slice(0, 10)}
+              products={featuredList.slice(0, 10)}
               viewAllLink="/products"
             />
             <HorizontalProductCarousel
               title="Up to 60% off | Trending products from Emerging Businesses"
-              products={(deals?.data?.data?.products || []).slice(0, 10)}
+              products={dealsList.slice(0, 10)}
               viewAllLink="/deals"
             />
             <HorizontalProductCarousel
               title="Keep shopping for"
-              products={(featuredProducts?.data?.data?.products || []).slice(10, 18)}
+              products={featuredList.slice(10, 18)}
               viewAllLink="/products"
             />
             <HorizontalProductCarousel
               title="Pick up where you left off"
-              products={(deals?.data?.data?.products || []).slice(10, 18)}
+              products={dealsList.slice(10, 18)}
               viewAllLink="/products"
             />
           </div>
@@ -142,8 +166,9 @@ const HomePage = () => {
               Shop by Category
             </h2>
             <CategorySection
-              categories={categories?.data?.data?.categories || []}
+              categories={categoriesList}
               isLoading={categoriesLoading}
+              productsForImages={productsForCategoryImages}
             />
           </div>
         </section>
@@ -155,9 +180,7 @@ const HomePage = () => {
               Today's Deals
             </h2>
             <DealsSection
-              products={(deals?.data?.data?.products || []).filter(product => 
-                product.originalPrice && product.originalPrice > product.price
-              )}
+              products={discountedProducts}
               isLoading={dealsLoading}
             />
           </div>
