@@ -77,12 +77,37 @@ const ProductDetails = ({ product }) => {
     <div className="bg-transparent">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
         {/* Left: Image Gallery (thumbnails + main) */}
-        <div className="lg:col-span-3">
-          <ProductImageGallery images={product.images || []} title={product.title} />
+        <div className="lg:col-span-4">
+          <ProductImageGallery
+            images={product.images || []}
+            title={product.title}
+            color={(() => {
+              try {
+                const sv = (selectedVariations || {}) as any;
+                const svKey = Object.keys(sv).find((k) => k && k.toLowerCase().includes('color'));
+                if (svKey && sv[svKey]) return String(sv[svKey]);
+
+                const rawList: any[] = (Array.isArray(product.variations) && product.variations.length
+                  ? product.variations
+                  : (Array.isArray(product.variants) ? product.variants : [])) as any[];
+                const colorVar = (rawList || []).find((v: any) => (v?.name || '').toString().toLowerCase().includes('color'));
+                if (colorVar) {
+                  if (colorVar.selected) return String(colorVar.selected);
+                  const opts = colorVar.options;
+                  if (Array.isArray(opts) && opts.length) return String(opts[0]);
+                  if (typeof opts === 'string' && opts) return String(opts.split(',')[0]?.trim());
+                }
+
+                return product.color || product.colour || product.variantColor || product?.attributes?.color || '';
+              } catch (e) {
+                return product.color || product.colour || product.variantColor || product?.attributes?.color || '';
+              }
+            })()}
+          />
         </div>
 
         {/* Middle: Product Info */}
-        <div className="lg:col-span-6 space-y-4">
+        <div className="lg:col-span-5 space-y-4">
           {/** Title and pricing cluster to mimic Amazon spacing */}
           {/* Title and Brand */}
           <div>
