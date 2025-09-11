@@ -39,6 +39,7 @@ import RegistryPage from './pages/RegistryPage'
 import CustomerServicePage from './pages/CustomerServicePage'
 import GiftCardsPage from './pages/GiftCardsPage'
 import SellPage from './pages/SellPage'
+import Chatbot from './components/ui/Chatbot'
 
 export default function App(): React.ReactElement {
   return (
@@ -191,6 +192,8 @@ export default function App(): React.ReactElement {
           </main>
 
           <Footer />
+
+          <Chatbot />
         </div>
       </CartProvider>
     </AuthProvider>

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FiEye, FiTruck, FiCheckCircle } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import adminAPI from '../../services/adminAPI';
-import countryService from '../../services/countryService';
+import { formatCurrency } from '../../utils/currency';
 
 type Status = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
 
@@ -13,6 +14,7 @@ type AdminOrder = {
   user?: { firstName?: string; lastName?: string } | null;
   createdAt: string | number | Date;
   pricing?: { total?: number } | null;
+  payment?: { currency?: string } | null;
   status: Status | string;
 };
 
@@ -26,14 +28,6 @@ const AdminOrders = () => {
 
   const orders = (data?.data?.data?.orders ?? []) as AdminOrder[];
 
-  // Re-render to refresh currency formatting on location changes (mobile/tablet too)
-  const [countryTick, setCountryTick] = React.useState(0);
-  React.useEffect(() => {
-    const onChange = () => setCountryTick((v) => v + 1);
-    window.addEventListener('country:changed', onChange as any);
-    return () => window.removeEventListener('country:changed', onChange as any);
-  }, []);
-
   const [selectedStatusById, setSelectedStatusById] = React.useState<Record<string, Status>>({});
 
   const updateStatusMutation = useMutation(
@@ -42,9 +36,30 @@ const AdminOrders = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['admin-orders']);
+        queryClient.invalidateQueries(['admin-dashboard']);
       },
     }
   );
+
+  const deleteMutation = useMutation((id: string) => adminAPI.deleteAdminOrder(id), {
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries(['admin-orders'])
+      const prev = queryClient.getQueryData<any>(['admin-orders'])
+      // Optimistically remove the order from the cached list
+      queryClient.setQueryData(['admin-orders'], (old: any) => {
+        const orders = old?.data?.data?.orders || []
+        const next = orders.filter((o: any) => o._id !== id)
+        return { ...old, data: { ...old?.data, data: { ...(old?.data?.data || {}), orders: next } } }
+      })
+      return { prev }
+    },
+    onError: (_err, _id, ctx: any) => {
+      if (ctx?.prev) queryClient.setQueryData(['admin-orders'], ctx.prev)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(['admin-orders'])
+    },
+  })
 
   const allowedStatuses: Status[] = [
     'pending',
@@ -133,7 +148,7 @@ const AdminOrders = () => {
                         {new Date(order.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
-                        {order?.pricing?.total != null ? countryService.formatPrice(order.pricing.total as number) : '-'}
+                        {order?.pricing?.total != null ? formatCurrency(order.pricing.total as number, order?.payment?.currency) : '-'}
                       </td>
                       <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
@@ -145,10 +160,10 @@ const AdminOrders = () => {
                       </td>
                       <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center gap-3">
-                          <button className="text-amazon-orange hover:text-orange-600 flex items-center space-x-1">
+                          <Link to={`/orders/${order._id}`} className="text-amazon-orange hover:text-orange-600 flex items-center space-x-1">
                             <FiEye className="h-4 w-4" />
                             <span>View</span>
-                          </button>
+                          </Link>
                           <div className="flex items-center gap-2">
                             <select
                               className="border rounded px-2 py-1 text-sm"
@@ -169,6 +184,13 @@ const AdminOrders = () => {
                               }
                             >
                               {updateStatusMutation.isLoading ? 'Updating...' : 'Update'}
+                            </button>
+                            <button
+                              className="bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-60"
+                              disabled={deleteMutation.isLoading}
+                              onClick={() => deleteMutation.mutate(order._id)}
+                            >
+                              {deleteMutation.isLoading ? 'Deleting...' : 'Delete'}
                             </button>
                           </div>
                         </div>

@@ -43,6 +43,14 @@ router.get('/dashboard', async (req, res) => {
         }
       }
     ]);
+    // Detect if all paid orders share the same currency
+    const currenciesAgg = await Order.aggregate([
+      { $match: orderMatch },
+      { $group: { _id: '$payment.currency', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+    const uniqueCurrencies = (currenciesAgg || []).filter(Boolean);
+    const singleCurrency = uniqueCurrencies.length === 1 ? (uniqueCurrencies[0]._id || 'USD') : null;
     const statusAgg = await Order.aggregate([
       { $match: orderMatch },
       { $group: { _id: '$status', count: { $sum: 1 } } }
@@ -123,7 +131,7 @@ router.get('/dashboard', async (req, res) => {
       .populate('items.product', 'title images')
       .sort({ createdAt: -1 })
       .limit(10)
-      .select('orderNumber user status pricing.total createdAt')
+      .select('orderNumber user status pricing.total payment.currency createdAt')
       .lean();
 
     // Get top selling products
@@ -196,7 +204,10 @@ router.get('/dashboard', async (req, res) => {
       User.countDocuments({}),
       Product.countDocuments({}),
       Order.countDocuments({}),
-      Order.aggregate([{ $group: { _id: null, revenue: { $sum: '$pricing.total' } } }])
+      Order.aggregate([
+        { $match: { 'payment.status': 'paid' } },
+        { $group: { _id: null, revenue: { $sum: '$pricing.total' } } }
+      ])
     ]);
 
     // Native collection counts for diagnostics (same connection/db)
@@ -219,6 +230,7 @@ router.get('/dashboard', async (req, res) => {
           totalRevenue: (revenueAgg?.[0]?.revenue) || orderStats[0]?.totalRevenue || 0,
           averageOrderValue: orderStats[0]?.averageOrderValue || 0,
           statusBreakdown: orderStats[0]?.statusBreakdown || {},
+          revenueCurrency: singleCurrency || null,
         },
         productStats: {
           totalProducts: productsCount || productStats[0]?.totalProducts || 0,
@@ -236,6 +248,7 @@ router.get('/dashboard', async (req, res) => {
           products: productsCount || 0,
           orders: ordersCount || 0,
           revenue: (revenueAgg?.[0]?.revenue) || 0,
+          revenueCurrency: singleCurrency || null,
         },
         debugCounts: native,
         recentOrders,
@@ -349,6 +362,30 @@ router.get('/orders', [
       success: false,
       message: 'Server error while fetching orders'
     });
+  }
+});
+
+// @route   DELETE /api/admin/orders/:id
+// @desc    Delete an order by ID
+// @access  Private (Admin only)
+router.delete('/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid order ID' });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    await Order.deleteOne({ _id: id });
+
+    return res.json({ success: true, message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Admin delete order error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while deleting order' });
   }
 });
 

@@ -96,6 +96,8 @@ A full-stack Amazon clone built with the MERN stack (MongoDB, Express.js, React,
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-app-password
    FRONTEND_URL=http://localhost:3000
+   GEMINI_API_KEY=your-gemini-api-key
+   GEMINI_MODEL=gemini-1.5-flash
    ```
 
 4. **Start the backend server**

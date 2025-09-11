@@ -22,7 +22,12 @@ const CheckoutPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const defaultCountry = countryService.getCurrentCountry();
+  const { register, handleSubmit, formState: { errors }, watch } = useForm({
+    defaultValues: {
+      country: defaultCountry.code,
+    }
+  });
 
   const loadScript = (src: string) => {
     return new Promise<boolean>((resolve) => {
@@ -55,6 +60,7 @@ const CheckoutPage = () => {
           state: data.state,
           zipCode: data.zipCode,
           phone: data.phone,
+          country: data.country,
         },
         payment: { method: mappedMethod },
       };
@@ -73,13 +79,23 @@ const CheckoutPage = () => {
       }
 
       // 2) Ask backend to create Razorpay order
-      const amountToPay = total; // local already converted from server cart; backend handles gateway currency
-      const rzpOrderRes = await orderAPI.createPaymentIntent({ orderId, amount: amountToPay });
+      // The backend computes the amount and currency from the order; no amount sent from client
+      const rzpOrderRes = await orderAPI.createPaymentIntent({ orderId });
       const rzpData = rzpOrderRes.data.data;
 
       // 3) Load Razorpay checkout
       const ok = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
       if (!ok) throw new Error('Razorpay SDK failed to load');
+
+      // Detect gateway method constraints
+      const isINR = String(rzpData.currency).toUpperCase() === 'INR'
+      const exceedsUpiLimit = isINR && Number(rzpData.amount) > 10000000 // > ₹1,00,000 in paise
+
+      // If user selected UPI but amount exceeds limit, force switch to card to avoid gateway error
+      let effectiveMethod = method
+      if (exceedsUpiLimit && method === 'upi') {
+        effectiveMethod = 'card'
+      }
 
       const options: any = {
         key: rzpData.razorpayKeyId,
@@ -117,14 +133,24 @@ const CheckoutPage = () => {
           orderId,
         },
         theme: { color: '#ff9900' },
-        // Enable payment method based on selection
+        // Enable payment method based on selection and constraints
         method: {
-          netbanking: method === 'netbanking',
-          card: method === 'card',
-          upi: method === 'upi',
+          netbanking: exceedsUpiLimit ? (effectiveMethod === 'netbanking' || effectiveMethod === 'card') : effectiveMethod === 'netbanking',
+          card: exceedsUpiLimit ? true : effectiveMethod === 'card',
+          upi: exceedsUpiLimit ? false : effectiveMethod === 'upi',
           wallet: false,
         },
+        ...(exceedsUpiLimit ? { config: { display: { hide: [{ method: 'upi' }] } } } : {}),
       };
+
+      if (exceedsUpiLimit) {
+        toast((t) => (
+          <div>
+            <div className="font-semibold">UPI limit exceeded for this amount</div>
+            <div className="text-sm">Please pay using Card or Netbanking.</div>
+          </div>
+        ));
+      }
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function () {
@@ -164,6 +190,20 @@ const CheckoutPage = () => {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Shipping Address</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                    <select
+                      {...register('country', { required: 'Country is required' })}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-transparent"
+                    >
+                      {countryService.getAllCountries().map((c) => (
+                        <option key={c.code} value={c.code}>{c.name}</option>
+                      ))}
+                    </select>
+                    {errors.country && (
+                      <p className="mt-1 text-sm text-red-600">{(errors as any).country.message}</p>
+                    )}
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       First Name

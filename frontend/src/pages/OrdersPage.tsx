@@ -4,6 +4,7 @@ import { FiPackage, FiTruck, FiCheckCircle } from 'react-icons/fi';
 import { useQuery } from 'react-query';
 import orderAPI from '../services/orderAPI';
 import { Link } from 'react-router-dom';
+import { formatCurrency } from '../utils/currency';
 
 const OrdersPage = () => {
   const { data, isLoading } = useQuery(
@@ -79,7 +80,7 @@ const OrdersPage = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-gray-900">${order.pricing?.total?.toFixed?.(2)}</p>
+                      <p className="text-lg font-semibold text-gray-900">{formatCurrency(order.pricing?.total, order?.payment?.currency)}</p>
                       <p className="text-sm text-gray-500">{order.items?.length || 0} item(s)</p>
                     </div>
                   </div>

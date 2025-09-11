@@ -17,6 +17,7 @@ const orderRoutes = require('./backend-dist/routes/orders.js');
 const paymentRoutes = require('./backend-dist/routes/payments.js');
 const adminRoutes = require('./backend-dist/routes/admin.js');
 const cartRoutes = require('./backend-dist/routes/cart.js');
+const chatRoutes = require('./backend-dist/routes/chat.js');
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

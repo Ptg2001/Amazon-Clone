@@ -23,13 +23,10 @@ const razorpay = new Razorpay({
 router.post('/create-payment-intent', protect, [
   body('orderId')
     .isMongoId()
-    .withMessage('Valid order ID is required'),
-  body('amount')
-    .isFloat({ min: 0.01 })
-    .withMessage('Amount must be greater than 0')
+    .withMessage('Valid order ID is required')
 ], handleValidationErrors, async (req, res) => {
   try {
-    const { orderId, amount } = req.body;
+    const { orderId } = req.body;
 
     // Verify order exists and belongs to user
     const order = await Order.findOne({
@@ -45,18 +42,15 @@ router.post('/create-payment-intent', protect, [
       });
     }
 
-    // Verify amount matches order total
-    if (Math.abs(amount - order.pricing.total) > 0.01) {
-      return res.status(400).json({
-        success: false,
-        message: 'Payment amount does not match order total'
-      });
-    }
+    // Amount to charge is the server-computed total in the order currency
+    // Razorpay limits and currency specifics: INR supports UPI up to ₹1,00,000. Use currency minor units.
+    const amount = order.pricing.total;
 
-    // Create Razorpay order (amount in paise; using INR)
+    // Create Razorpay order (amount in minor units; supports INR/EUR/GBP)
+    const currency = (order.payment?.currency || 'INR').toUpperCase();
     const rzpOrder = await razorpay.orders.create({
-      amount: Math.round(amount * 100),
-      currency: 'INR',
+      amount: Math.max(100, Math.round(amount * 100)), // minimum 1.00 unit safeguard
+      currency,
       receipt: orderId,
       notes: { userId: req.user._id.toString() },
     });

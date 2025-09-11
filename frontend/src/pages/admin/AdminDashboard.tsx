@@ -1,14 +1,15 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient, useMutation } from 'react-query';
 import { FiUsers, FiPackage, FiDollarSign, FiTrendingUp, FiPlus, FiBox, FiShoppingBag } from 'react-icons/fi';
-import productAPI from '../../services/productAPI';
 import adminAPI from '../../services/adminAPI';
 import { Link } from 'react-router-dom';
 import countryService from '../../services/countryService';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import { formatCurrency } from '../../utils/currency';
 
 const AdminDashboard = () => {
+  const queryClient = useQueryClient();
   // Fetch products data for stats
   const { data: dashboardData, isLoading: dashboardLoading } = useQuery(
     ['admin-dashboard'],
@@ -27,6 +28,27 @@ const AdminDashboard = () => {
   const stats = dashboardData?.data?.data || {};
   const totals = stats.totals || {};
   const recentOrders = stats.recentOrders || [];
+
+  // Optimistic delete for recent orders
+  const deleteRecentMutation = useMutation((id: string) => adminAPI.deleteAdminOrder(id), {
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries(['admin-dashboard'])
+      const previous = queryClient.getQueryData<any>(['admin-dashboard'])
+      queryClient.setQueryData(['admin-dashboard'], (old: any) => {
+        const data = old?.data?.data || {}
+        const current = data.recentOrders || []
+        const next = current.filter((o: any) => o._id !== id)
+        return { ...old, data: { ...old?.data, data: { ...data, recentOrders: next } } }
+      })
+      return { previous }
+    },
+    onError: (_err, _id, ctx: any) => {
+      if (ctx?.previous) queryClient.setQueryData(['admin-dashboard'], ctx.previous)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(['admin-dashboard'])
+    }
+  })
 
   if (dashboardLoading) {
     return (
@@ -149,7 +171,13 @@ const AdminDashboard = () => {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">{countryService.formatPrice((totals.revenue ?? stats.orderStats?.totalRevenue ?? 0) as number)}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {(() => {
+                      const amount = (totals.revenue ?? stats.orderStats?.totalRevenue ?? 0) as number
+                      const currency = (totals.revenueCurrency ?? stats.orderStats?.revenueCurrency ?? countryService.getCurrencyCode()) as string
+                      try { return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount) } catch { return `${currency} ${amount.toFixed?.(2)}` }
+                    })()}
+                  </p>
                 </div>
               </div>
             </div>
@@ -180,7 +208,7 @@ const AdminDashboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {recentOrders.map((order) => (
-                    <tr key={order._id || order.orderNumber}>
+                    <tr key={order._id || order.orderNumber} id={`recent-${order._id}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {order.orderNumber}
                       </td>
@@ -188,7 +216,7 @@ const AdminDashboard = () => {
                         {order.user?.firstName} {order.user?.lastName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {order?.pricing?.total != null ? countryService.formatPrice(order.pricing.total as number) : '-'}
+                        {order?.pricing?.total != null ? formatCurrency(order.pricing.total as number, order?.payment?.currency) : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -198,6 +226,14 @@ const AdminDashboard = () => {
                         }`}>
                           {order.status}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <button
+                          className="bg-red-600 text-white px-3 py-1 rounded text-sm"
+                          onClick={() => deleteRecentMutation.mutate(order._id)}
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}

@@ -181,7 +181,33 @@ router.post('/', protect, [
   try {
     const { items, shippingAddress, billingAddress, payment, notes } = req.body;
 
-    // Validate products and calculate totals
+    // Determine currency from shipping country
+    const country = (shippingAddress?.country || '').toUpperCase();
+    let currency = 'USD';
+    if (country === 'IN' || country === 'INDIA') currency = 'INR';
+    else if (country === 'GB' || country === 'UK' || country === 'UNITED KINGDOM') currency = 'GBP';
+    else if (['EU','DE','FR','IT','ES','NL'].includes(country)) currency = 'EUR';
+
+    // FX rate once
+    let fxRate = 1;
+    if (currency !== 'USD') {
+      try {
+        const axios = require('axios');
+        const now = Date.now();
+        if (!(global as any).__fxCache) (global as any).__fxCache = { ts: 0, rates: {} };
+        const fxCache = (global as any).__fxCache;
+        if (!fxCache.ts || now - fxCache.ts > 60 * 60 * 1000) {
+          const apiKey = process.env.EXCHANGE_RATES_API_KEY;
+          const url = apiKey ? `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD` : 'https://open.er-api.com/v6/latest/USD';
+          const { data } = await axios.get(url, { timeout: 8000 });
+          const rates = data?.conversion_rates || data?.rates || {};
+          if (rates && Object.keys(rates).length) { fxCache.ts = now; fxCache.rates = rates; }
+        }
+        fxRate = (global as any).__fxCache.rates?.[currency] || 1;
+      } catch (_) { fxRate = 1; }
+    }
+
+    // Validate products and calculate totals using target currency unit prices
     const orderItems = [];
     let subtotal = 0;
 
@@ -208,26 +234,29 @@ router.post('/', protect, [
         });
       }
 
-      const itemTotal = product.price * item.quantity;
+      const unitPrice = fxRate && fxRate !== 1 ? parseFloat((product.price * fxRate).toFixed(2)) : product.price;
+      const itemTotal = parseFloat((unitPrice * item.quantity).toFixed(2));
       subtotal += itemTotal;
 
       orderItems.push({
         product: product._id,
         quantity: item.quantity,
-        price: product.price,
+        price: unitPrice,
         total: itemTotal,
         variant: item.variant || null
       });
     }
 
-    // Calculate tax (simplified - 8% tax rate)
-    const tax = subtotal * 0.08;
 
-    // Calculate shipping (free shipping over $50)
-    const shipping = subtotal >= 50 ? 0 : 9.99;
+    const tax = parseFloat((subtotal * 0.08).toFixed(2));
+
+    // Shipping by currency thresholds
+    const freeThreshold = currency === 'INR' ? 4000 : (currency === 'EUR' || currency === 'GBP') ? 50 : 50;
+    const baseShip = currency === 'INR' ? 149 : (currency === 'EUR' || currency === 'GBP') ? 6.99 : 9.99;
+    const shipping = subtotal >= freeThreshold ? 0 : baseShip;
 
     // Calculate total
-    const total = subtotal + tax + shipping;
+    const total = parseFloat((subtotal + tax + shipping).toFixed(2));
 
     // Create order
     const orderData = {
@@ -238,7 +267,7 @@ router.post('/', protect, [
       payment: {
         method: payment.method,
         amount: total,
-        currency: 'USD'
+        currency,
       },
       pricing: {
         subtotal,

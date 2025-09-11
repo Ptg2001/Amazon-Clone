@@ -6,6 +6,7 @@ const adminAPI = {
 
   // Orders
   getAdminOrders: (params) => api.get('/admin/orders', { params }),
+  deleteAdminOrder: (orderId) => api.delete(`/admin/orders/${orderId}`),
   updateOrderStatus: (orderId, payload) => api.put(`/orders/${orderId}/status`, payload),
 
   // Products
