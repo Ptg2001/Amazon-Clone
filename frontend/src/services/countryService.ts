@@ -98,8 +98,28 @@ class CountryService {
           this.currentCountry = { code, ...COUNTRY_DATA[code] } as any;
           this._saveToStorage();
           this._emitChange();
-          return this.currentCountry;
+          // If server returned default (often US behind some hosts), try client-side IP as a better hint
+          if (code !== 'US') return this.currentCountry;
         }
+      }
+      // Client-side IP lookup fallback for deployments behind proxies/CDNs
+      try {
+        const ctl = new AbortController();
+        const t = setTimeout(() => ctl.abort(), 4000);
+        const ipRes = await fetch('https://ipapi.co/json/', { signal: ctl.signal });
+        clearTimeout(t);
+        if (ipRes.ok) {
+          const ipJson: any = await ipRes.json();
+          const ipCode = (ipJson?.country || ipJson?.country_code || '').toString().toUpperCase();
+          if (ipCode && COUNTRY_DATA[ipCode]) {
+            this.currentCountry = { code: ipCode, ...COUNTRY_DATA[ipCode] } as any;
+            this._saveToStorage();
+            this._emitChange();
+            return this.currentCountry;
+          }
+        }
+      } catch (_) {
+        // ignore, fallback to browser settings
       }
       // Fallback to browser-based detection
       return this._detectFromBrowser();
