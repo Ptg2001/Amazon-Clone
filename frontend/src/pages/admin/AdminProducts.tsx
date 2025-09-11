@@ -24,6 +24,14 @@ const AdminProducts = () => {
 
   const products = productsData?.data?.data?.products || [];
 
+  // Re-render to update currency formatting when country changes
+  const [countryTick, setCountryTick] = React.useState(0);
+  React.useEffect(() => {
+    const onChange = () => setCountryTick((v) => v + 1);
+    window.addEventListener('country:changed', onChange as any);
+    return () => window.removeEventListener('country:changed', onChange as any);
+  }, []);
+
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [form, setForm] = useState({
     title: '',

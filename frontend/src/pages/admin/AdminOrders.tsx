@@ -26,6 +26,14 @@ const AdminOrders = () => {
 
   const orders = (data?.data?.data?.orders ?? []) as AdminOrder[];
 
+  // Re-render to refresh currency formatting on location changes (mobile/tablet too)
+  const [countryTick, setCountryTick] = React.useState(0);
+  React.useEffect(() => {
+    const onChange = () => setCountryTick((v) => v + 1);
+    window.addEventListener('country:changed', onChange as any);
+    return () => window.removeEventListener('country:changed', onChange as any);
+  }, []);
+
   const [selectedStatusById, setSelectedStatusById] = React.useState<Record<string, Status>>({});
 
   const updateStatusMutation = useMutation(

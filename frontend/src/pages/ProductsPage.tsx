@@ -5,14 +5,23 @@ import { useQuery } from 'react-query';
 import productAPI from '../services/productAPI';
 import ProductCard from '../components/products/ProductCard';
 import LoadingSkeleton from '../components/ui/LoadingSkeleton';
+import countryService from '../services/countryService';
 
 const ProductsPage = () => {
   const [searchParams] = useSearchParams();
   const featured = searchParams.get('featured') === 'true';
 
+  const [countryTick, setCountryTick] = React.useState(0);
+  React.useEffect(() => {
+    const onChange = () => setCountryTick((v) => v + 1);
+    window.addEventListener('country:changed', onChange as any);
+    return () => window.removeEventListener('country:changed', onChange as any);
+  }, []);
+
+  const currencyCode = countryService.getCurrencyCode();
   const { data, isLoading } = useQuery(
-    ['products-list', featured],
-    () => productAPI.getProducts({ featured: featured || undefined, limit: 24 }),
+    ['products-list', featured, currencyCode, countryTick],
+    () => productAPI.getProducts({ featured: featured || undefined, limit: 24, currency: currencyCode }),
     { keepPreviousData: true }
   );
 

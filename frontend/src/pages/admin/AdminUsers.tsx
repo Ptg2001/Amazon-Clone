@@ -15,6 +15,14 @@ const AdminUsers = () => {
 
   const users = data?.data?.data?.users || [];
 
+  // Re-render on location change (for any future currency display in users or badges)
+  const [countryTick, setCountryTick] = React.useState(0);
+  React.useEffect(() => {
+    const onChange = () => setCountryTick((v) => v + 1);
+    window.addEventListener('country:changed', onChange as any);
+    return () => window.removeEventListener('country:changed', onChange as any);
+  }, []);
+
   const [editingUser, setEditingUser] = React.useState<any | null>(null);
   const [form, setForm] = React.useState({
     firstName: '',

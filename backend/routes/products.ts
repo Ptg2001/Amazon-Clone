@@ -167,7 +167,7 @@ router.get('/', [
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Execute query
-    const products = await Product.find(filter)
+    let products = await Product.find(filter)
       .populate('category', 'name slug')
       .sort(sortObj)
       .skip(skip)
@@ -176,6 +176,16 @@ router.get('/', [
 
     // Get total count for pagination
     const total = await Product.countDocuments(filter);
+
+    // Optional currency conversion for listing
+    const { currency } = req.query as any;
+    if (currency && String(currency).toUpperCase() !== 'USD') {
+      const rates = await getUsdRates();
+      const rate = rates[String(currency).toUpperCase()] || 1;
+      if (rate && rate !== 1) {
+        products = products.map((p: any) => convertPriceFields(p, rate));
+      }
+    }
 
     // Calculate pagination info
     const totalPages = Math.ceil(total / parseInt(limit));

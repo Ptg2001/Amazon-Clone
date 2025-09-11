@@ -16,6 +16,14 @@ const AdminDashboard = () => {
     { staleTime: 60 * 1000 }
   );
 
+  // Re-render on country change so currency formatting updates on mobile/tablet too
+  const [countryTick, setCountryTick] = React.useState(0);
+  React.useEffect(() => {
+    const onChange = () => setCountryTick((v) => v + 1);
+    window.addEventListener('country:changed', onChange as any);
+    return () => window.removeEventListener('country:changed', onChange as any);
+  }, []);
+
   const stats = dashboardData?.data?.data || {};
   const totals = stats.totals || {};
   const recentOrders = stats.recentOrders || [];

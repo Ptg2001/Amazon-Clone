@@ -50,6 +50,8 @@ const Navbar = () => {
     };
     // Defer detection slightly to reduce initial load burst
     const t = setTimeout(loadCountry, 500);
+    const onChange = () => setCurrentCountry(countryService.getCurrentCountry() as Country);
+    window.addEventListener('country:changed', onChange as any);
     return () => { mounted = false; clearTimeout(t); };
   }, []);
 

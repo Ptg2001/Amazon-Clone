@@ -97,6 +97,7 @@ class CountryService {
         if (code && COUNTRY_DATA[code]) {
           this.currentCountry = { code, ...COUNTRY_DATA[code] } as any;
           this._saveToStorage();
+          this._emitChange();
           return this.currentCountry;
         }
       }
@@ -127,6 +128,7 @@ class CountryService {
     }
     
     this._saveToStorage();
+    this._emitChange();
     return this.currentCountry;
   }
 
@@ -158,6 +160,7 @@ class CountryService {
         ...COUNTRY_DATA[countryCode.toUpperCase()]
       };
       this._saveToStorage();
+      this._emitChange();
       return this.currentCountry;
     }
     throw new Error(`Country code ${countryCode} not supported`);
@@ -355,6 +358,13 @@ class CountryService {
         }
       } catch {}
     }
+  }
+
+  _emitChange() {
+    try {
+      const detail = { code: this.currentCountry?.code, currency: this.getCurrencyCode() } as any;
+      window.dispatchEvent(new CustomEvent('country:changed', { detail }));
+    } catch {}
   }
 }
 
