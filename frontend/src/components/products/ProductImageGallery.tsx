@@ -128,15 +128,15 @@ const ProductImageGallery = ({ images = [], title = 'Product image', color, colo
   return (
     <div className="w-full">
       <div className="flex gap-3 relative">
-        {/* Thumbnails (vertical) */}
+        {/* Thumbnails: horizontal on mobile, vertical on md+ */}
         {images && images.length > 0 && (
-          <div className="flex flex-col gap-2 w-14 sm:w-16">
+          <div className="flex md:flex-col gap-2 w-full md:w-14 md:sm:w-16 overflow-x-auto md:overflow-visible no-scrollbar pb-2 md:pb-0">
             {images.map((img, idx) => (
               <button
                 key={`${img.url}-${idx}`}
                 onClick={() => setSelectedIndex(idx)}
                 aria-label={`Select image ${idx + 1}`}
-                className={`relative w-full aspect-square rounded-md overflow-hidden border ${
+                className={`relative md:w-full w-20 h-20 md:h-auto md:aspect-square flex-shrink-0 rounded-md overflow-hidden border ${
                   idx === selectedIndex ? 'border-amazon-orange ring-1 ring-amazon-orange' : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
@@ -153,11 +153,11 @@ const ProductImageGallery = ({ images = [], title = 'Product image', color, colo
         )}
 
         {/* Main image */}
-        <div className="basis-[220px] sm:basis-[260px] lg:basis-[300px] grow-0 shrink-0 bg-white border border-gray-200 rounded-lg relative overflow-visible">
+        <div className="flex-1 bg-white border border-gray-200 rounded-lg relative overflow-visible">
           <div
             ref={containerRef}
             className="aspect-[4/3] w-full bg-white group relative"
-            onMouseEnter={() => { setIsZooming(true); updatePreviewPlacement(); }}
+            onMouseEnter={() => setIsZooming(true)}
             onMouseLeave={() => setIsZooming(false)}
             onMouseMove={handleMouseMove}
           >

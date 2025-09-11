@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import countryService from '../../services/countryService';
 
 type Item = { _id: string; title: string; sponsored?: boolean; images?: { url: string }[]; price?: number };
 
@@ -19,7 +20,7 @@ const SponsoredCarousel = ({ items = [] as Item[] }: { items?: Item[] }) => {
             </div>
             <div className="mt-2 text-xs text-gray-500">Sponsored</div>
             <div className="mt-1 text-sm font-medium text-gray-900 line-clamp-2">{p.title}</div>
-            {p.price != null && <div className="mt-1 text-amazon-orange font-semibold">${p.price.toFixed(2)}</div>}
+            {p.price != null && <div className="mt-1 text-amazon-orange font-semibold">{countryService.formatLocalCurrency(p.price)}</div>}
           </Link>
         ))}
       </div>

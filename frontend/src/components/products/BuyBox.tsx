@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { addToCart, setCartFromServer } from '../../store/slices/cartSlice';
 import cartAPI from '../../services/cartAPI';
 import { useNavigate } from 'react-router-dom';
+import countryService from '../../services/countryService';
 
 const BuyBox = ({ product, selectedVariant }: { product: any; selectedVariant?: Record<string, string> }) => {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ const BuyBox = ({ product, selectedVariant }: { product: any; selectedVariant?: 
       await cartAPI.addItem(product._id, quantity, variant);
       const res = await cartAPI.getCart();
       dispatch(setCartFromServer(res?.data?.data?.cart));
-      toast.success('Added to cart');
+      toast.success('Added to cart', { duration: 1500 });
       if (goCheckout) {
         navigate('/checkout');
       }
@@ -39,8 +40,7 @@ const BuyBox = ({ product, selectedVariant }: { product: any; selectedVariant?: 
     }
   };
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price || 0);
+  const formatPrice = (price: number) => countryService?.formatLocalCurrency ? countryService.formatLocalCurrency(price || 0) : `$${(price || 0).toFixed(2)}`;
 
   return (
     <aside className="w-full lg:w-auto">

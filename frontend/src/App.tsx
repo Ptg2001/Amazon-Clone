@@ -31,6 +31,14 @@ import AdminRoute from './components/auth/AdminRoute'
 
 import { CartProvider } from './contexts/CartContext'
 import { AuthProvider } from './contexts/AuthContext'
+import ScrollToTop from './components/layout/ScrollToTop'
+import ProfileSettingsPage from './pages/ProfileSettingsPage'
+import PaymentMethodsPage from './pages/PaymentMethodsPage'
+import AddressesPage from './pages/AddressesPage'
+import RegistryPage from './pages/RegistryPage'
+import CustomerServicePage from './pages/CustomerServicePage'
+import GiftCardsPage from './pages/GiftCardsPage'
+import SellPage from './pages/SellPage'
 
 export default function App(): React.ReactElement {
   return (
@@ -49,10 +57,15 @@ export default function App(): React.ReactElement {
           <Navbar />
 
           <main className="min-h-screen">
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/deals" element={<DealsPage />} />
+              <Route path="/registry" element={<RegistryPage />} />
+              <Route path="/customer-service" element={<CustomerServicePage />} />
+              <Route path="/gift-cards" element={<GiftCardsPage />} />
+              <Route path="/sell" element={<SellPage />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/category/:slug" element={<CategoryPage />} />
               <Route path="/search" element={<SearchPage />} />
@@ -80,6 +93,30 @@ export default function App(): React.ReactElement {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/settings"
+                element={
+                  <ProtectedRoute>
+                    <ProfileSettingsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/payment-methods"
+                element={
+                  <ProtectedRoute>
+                    <PaymentMethodsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/addresses"
+                element={
+                  <ProtectedRoute>
+                    <AddressesPage />
                   </ProtectedRoute>
                 }
               />

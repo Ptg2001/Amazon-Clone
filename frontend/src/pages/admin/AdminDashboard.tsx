@@ -5,6 +5,7 @@ import { FiUsers, FiPackage, FiDollarSign, FiTrendingUp, FiPlus, FiBox, FiShoppi
 import productAPI from '../../services/productAPI';
 import adminAPI from '../../services/adminAPI';
 import { Link } from 'react-router-dom';
+import countryService from '../../services/countryService';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 
 const AdminDashboard = () => {
@@ -26,7 +27,7 @@ const AdminDashboard = () => {
           <div className="mb-8">
             <LoadingSkeleton height="40px" width="300px" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
             {[...Array(4)].map((_, index) => (
               <LoadingSkeleton key={index} height="120px" />
             ))}
@@ -140,7 +141,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">${(totals.revenue ?? stats.orderStats?.totalRevenue ?? 0).toLocaleString?.()}</p>
+                  <p className="text-2xl font-bold text-gray-900">{countryService.formatPrice((totals.revenue ?? stats.orderStats?.totalRevenue ?? 0) as number)}</p>
                 </div>
               </div>
             </div>
@@ -179,7 +180,7 @@ const AdminDashboard = () => {
                         {order.user?.firstName} {order.user?.lastName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${order.pricing?.total?.toFixed?.(2)}
+                        {order?.pricing?.total != null ? countryService.formatPrice(order.pricing.total as number) : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

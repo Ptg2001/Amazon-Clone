@@ -6,6 +6,7 @@ import adminAPI from '../../services/adminAPI';
 import productAPI from '../../services/productAPI';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import { Link } from 'react-router-dom';
+import countryService from '../../services/countryService';
 
 const AdminProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -222,19 +223,19 @@ const AdminProducts = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Price
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                       Stock
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -249,7 +250,7 @@ const AdminProducts = () => {
                   ) : (
                     filteredProducts.map((product) => (
                       <tr key={product._id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mr-4 overflow-hidden">
                               {product.images?.[0]?.url ? (
@@ -273,7 +274,7 @@ const AdminProducts = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {(() => {
                             const d = typeof product.discount === 'number' && product.discount > 0 ? Math.round(product.discount) : 0;
                             const displayOriginal = (typeof product.originalPrice === 'number' && product.originalPrice > 0)
@@ -282,21 +283,21 @@ const AdminProducts = () => {
                             const showCross = displayOriginal > product.price;
                             return showCross ? (
                               <div className="flex items-center gap-2">
-                                <span className="text-gray-500 line-through">${displayOriginal}</span>
-                                <span>${product.price}</span>
+                                <span className="text-gray-500 line-through">{countryService.formatPrice(displayOriginal)}</span>
+                                <span>{countryService.formatPrice(product.price)}</span>
                                 {d > 0 ? (
                                   <span className="text-xs text-red-600 font-semibold">-{d}%</span>
                                 ) : null}
                               </div>
                             ) : (
-                              <span>${product.price}</span>
+                              <span>{countryService.formatPrice(product.price)}</span>
                             );
                           })()}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
                           {product.inventory?.quantity || 0}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             product.isActive 
                               ? 'bg-green-100 text-green-800' 
@@ -305,7 +306,7 @@ const AdminProducts = () => {
                             {product.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
                             <button
                               className="text-amazon-orange hover:text-orange-600"

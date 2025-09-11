@@ -159,7 +159,32 @@ const productSchema = new mongoose.Schema({
       type: Number,
       default: 0
     },
-    images: [String]
+    images: [String],
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  qna: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    question: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 500
+    },
+    answer: {
+      type: String,
+      trim: true,
+      maxlength: 2000
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
   }],
   tags: [String],
   isActive: {

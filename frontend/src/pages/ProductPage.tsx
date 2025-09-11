@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from 'react-query';
 import productAPI from '../services/productAPI';
+import countryService from '../services/countryService';
 import ProductDetails from '../components/products/ProductDetails';
 import ProductReviews from '../components/products/ProductReviews';
 import RelatedProducts from '../components/products/RelatedProducts';
@@ -24,9 +25,10 @@ import StickySubnav from '../components/products/StickySubnav';
 const ProductPage = () => {
   const { id } = useParams();
 
-  const { data: productData, isLoading, error } = useQuery(
-    ['product', id],
-    () => productAPI.getProduct(id),
+  const currencyCode = countryService.getCurrencyCode();
+  const { data: productData, isLoading, error, refetch } = useQuery(
+    ['product', id, currencyCode],
+    () => productAPI.getProduct(id, currencyCode),
     {
       enabled: !!id,
     }
@@ -42,8 +44,8 @@ const ProductPage = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
           <p className="text-gray-600 mb-4">The product you're looking for doesn't exist.</p>
-          <a href="/" className="text-amazon-orange hover:underline">
-            Return to Home
+          <a href="/products" className="text-amazon-orange hover:underline">
+            Browse Products
           </a>
         </div>
       </div>
@@ -113,15 +115,15 @@ const ProductPage = () => {
                 <ProductAPlus blocks={product.aplus || []} />
               </section>
               <section id="qna" className="scroll-mt-36">
-                <ProductQnA qna={product.qna || []} />
+                <ProductQnA qna={product.qna || []} productId={product._id} onSubmitted={() => refetch()} />
               </section>
               <section id="reviews" className="scroll-mt-36">
-                <ProductReviews product={product} />
+                <ProductReviews product={product} onReviewSubmitted={() => refetch()} />
               </section>
               {relatedProducts.length > 0 && (
                 <RelatedProducts products={relatedProducts} />
               )}
-              <ComparisonTable products={relatedProducts} />
+              <ComparisonTable products={relatedProducts} productId={product._id} />
               <SponsoredCarousel items={relatedProducts} />
               <CustomersAlsoBought items={product.alsoBought || relatedProducts} />
               <FromTheBrand brand={product.brand} blocks={product.fromBrand || []} />

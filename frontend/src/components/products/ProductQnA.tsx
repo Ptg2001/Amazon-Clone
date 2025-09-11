@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import productAPI from '../../services/productAPI';
 
 type QA = { question: string; answer?: string; user?: { firstName?: string } };
 
-const ProductQnA = ({ qna = [] as QA[] }: { qna?: QA[] }) => {
+const ProductQnA = ({ qna = [] as QA[], productId, onSubmitted }: { qna?: QA[]; productId?: string; onSubmitted?: () => void }) => {
   const { isAuthenticated } = useSelector((state: any) => state.auth);
   const [items, setItems] = useState<QA[]>(qna);
   const [text, setText] = useState('');
 
-  const submitQuestion = () => {
+  const submitQuestion = async () => {
     if (!isAuthenticated) {
       toast.error('Please sign in to ask a question');
       return;
     }
     if (!text.trim()) return;
-    setItems([{ question: text.trim() }, ...items]);
-    setText('');
-    toast.success('Question submitted');
+    try {
+      if (!productId) throw new Error('Missing product ID');
+      await productAPI.addQuestion(productId, { question: text.trim() });
+      toast.success('Question submitted');
+      setText('');
+      onSubmitted && onSubmitted();
+    } catch (e: any) {
+      const msg = e?.response?.data?.message || e?.message || 'Failed to submit question';
+      toast.error(msg);
+    }
   };
 
   if (!items.length && !isAuthenticated) return null;

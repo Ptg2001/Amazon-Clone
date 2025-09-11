@@ -70,6 +70,11 @@ class CountryService {
   constructor() {
     this.currentCountry = null;
     this.detectionPromise = null;
+    // FX rates cache from backend (USD base)
+    this.fxUSDTo = {
+      USD: 1,
+      // populated at runtime
+    } as Record<string, number>;
   }
 
   // Detect user's country using IP geolocation
@@ -84,7 +89,18 @@ class CountryService {
 
   async _performDetection() {
     try {
-      // Disable external IP geolocation to avoid CORS/429 issues; use browser locale/localStorage only
+      // Try server-side geo first (avoids CORS, uses server IP pass-through)
+      const res = await fetch('/api/users/geo', { credentials: 'include' });
+      if (res.ok) {
+        const json = await res.json();
+        const code = json?.data?.countryCode;
+        if (code && COUNTRY_DATA[code]) {
+          this.currentCountry = { code, ...COUNTRY_DATA[code] } as any;
+          this._saveToStorage();
+          return this.currentCountry;
+        }
+      }
+      // Fallback to browser-based detection
       return this._detectFromBrowser();
     } catch (error) {
       console.error('Country detection failed:', error);
@@ -249,6 +265,96 @@ class CountryService {
       'NZD': 'NZ$'
     };
     return currencySymbols[country.currency] || '$';
+  }
+
+  // Get active currency code
+  getCurrencyCode() {
+    return this.getCurrentCountry().currency || 'USD';
+  }
+
+  // Convert a USD amount to the active currency (approximate)
+  convertFromUSD(amountUSD: number): number {
+    const code = this.getCurrencyCode();
+    const rate = this.fxUSDTo[code] || 1;
+    return (amountUSD || 0) * rate;
+  }
+
+  // Format a USD amount in the active locale currency
+  formatPrice(amountUSD: number): string {
+    const code = this.getCurrencyCode();
+    const locale = this._guessLocaleFromCode(code);
+    const converted = this.convertFromUSD(amountUSD || 0);
+    try {
+      return new Intl.NumberFormat(locale, { style: 'currency', currency: code }).format(converted);
+    } catch {
+      const symbol = this.getCurrencySymbol();
+      return `${symbol}${converted.toFixed(2)}`;
+    }
+  }
+
+  // Format a local-currency amount (no conversion, only formatting)
+  formatLocalCurrency(amountLocal: number): string {
+    const code = this.getCurrencyCode();
+    const locale = this._guessLocaleFromCode(code);
+    try {
+      return new Intl.NumberFormat(locale, { style: 'currency', currency: code }).format(amountLocal || 0);
+    } catch {
+      const symbol = this.getCurrencySymbol();
+      const v = typeof amountLocal === 'number' ? amountLocal : 0;
+      return `${symbol}${(v).toFixed(2)}`;
+    }
+  }
+
+  _guessLocaleFromCode(code: string): string {
+    // Very rough mapping
+    const map: Record<string, string> = {
+      INR: 'en-IN',
+      USD: 'en-US',
+      EUR: 'de-DE',
+      GBP: 'en-GB',
+      CAD: 'en-CA',
+      AUD: 'en-AU',
+      JPY: 'ja-JP',
+      CNY: 'zh-CN',
+      AED: 'ar-AE',
+      SAR: 'ar-SA',
+      BRL: 'pt-BR',
+      MXN: 'es-MX',
+      SGD: 'en-SG',
+      HKD: 'zh-HK',
+      TWD: 'zh-TW',
+      KRW: 'ko-KR',
+      THB: 'th-TH',
+      IDR: 'id-ID',
+      MYR: 'ms-MY',
+      PHP: 'en-PH',
+      VND: 'vi-VN',
+      ZAR: 'en-ZA',
+      NGN: 'en-NG',
+    };
+    return map[code] || 'en-US';
+  }
+
+  async refreshFxRates(): Promise<void> {
+    try {
+      const res = await fetch('/api/users/fx-rates', { credentials: 'include' });
+      if (!res.ok) throw new Error('FX endpoint failed');
+      const json = await res.json();
+      const rates = json?.data?.rates || {};
+      if (rates && typeof rates === 'object') {
+        this.fxUSDTo = { ...this.fxUSDTo, ...rates };
+        try { localStorage.setItem('fx_usd_rates', JSON.stringify({ ts: Date.now(), rates })); } catch {}
+      }
+    } catch (e) {
+      // Load from cache if available
+      try {
+        const raw = localStorage.getItem('fx_usd_rates');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.rates) this.fxUSDTo = { ...this.fxUSDTo, ...parsed.rates };
+        }
+      } catch {}
+    }
   }
 }
 

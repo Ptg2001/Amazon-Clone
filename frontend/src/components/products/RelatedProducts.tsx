@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import countryService from '../../services/countryService';
 
 const RelatedProducts = ({ products }) => {
   if (!products || products.length === 0) {
@@ -34,7 +35,7 @@ const RelatedProducts = ({ products }) => {
               <p className="text-xs text-gray-500 mb-2">{product.brand}</p>
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-amazon-orange">
-                  ${product.price?.toFixed(2)}
+                  {countryService.formatLocalCurrency(product.price || 0)}
                 </span>
                 {product.ratings?.average > 0 && (
                   <div className="flex items-center space-x-1">

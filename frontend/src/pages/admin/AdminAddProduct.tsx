@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import productAPI from '../../services/productAPI';
+import countryService from '../../services/countryService';
 
 const AdminAddProduct = () => {
   const navigate = useNavigate();
@@ -266,7 +267,7 @@ const AdminAddProduct = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (USD)</label>
                 <input name="price" type="number" step="0.01" value={form.price} onChange={onChange} required className="w-full border border-gray-300 rounded-md px-3 py-2" />
               </div>
               <div>
@@ -287,7 +288,7 @@ const AdminAddProduct = () => {
             {/* Discount controls */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Original Price ($)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Original Price (USD)</label>
                 <input name="originalPrice" type="number" step="0.01" value={form.originalPrice} onChange={onChange} className="w-full border border-gray-300 rounded-md px-3 py-2" />
               </div>
               <div>
@@ -310,10 +311,12 @@ const AdminAddProduct = () => {
                       displayOrig = parseFloat((price / (1 - d / 100)).toFixed(2));
                     }
                     return (
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4 flex-wrap">
                         <span className="font-medium text-gray-800">Preview:</span>
-                        <span className="text-gray-500 line-through">${(displayOrig || 0).toFixed(2)}</span>
-                        <span>${(displayPrice || 0).toFixed(2)}</span>
+                        <span className="text-gray-700">USD <span className="text-gray-500 line-through">${(displayOrig || 0).toFixed(2)}</span> → ${
+                          (displayPrice || 0).toFixed(2)
+                        }</span>
+                        <span className="text-gray-700">Local <span className="text-gray-500 line-through">{countryService.formatPrice(displayOrig || 0)}</span> → {countryService.formatPrice(displayPrice || 0)}</span>
                         {d > 0 ? <span className="text-xs text-red-600 font-semibold">-{d}%</span> : null}
                       </div>
                     );

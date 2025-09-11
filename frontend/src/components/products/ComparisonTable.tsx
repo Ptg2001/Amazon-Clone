@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import productAPI from '../../services/productAPI';
+import countryService from '../../services/countryService';
 
 type ProductLite = {
   _id: string;
@@ -10,8 +12,26 @@ type ProductLite = {
   features?: string[];
 };
 
-const ComparisonTable = ({ products = [] as ProductLite[] }: { products?: ProductLite[] }) => {
-  const cols = products.slice(0, 5);
+const ComparisonTable = ({ products = [] as ProductLite[], productId }: { products?: ProductLite[]; productId?: string }) => {
+  const [similar, setSimilar] = useState<ProductLite[]>([]);
+
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      try {
+        if (productId) {
+          const res = await productAPI.getSimilar(productId);
+          const items = res?.data?.data?.items || res?.data?.items || [];
+          if (!ignore) setSimilar(items);
+        }
+      } catch (_e) {}
+    };
+    // prefer provided list; fallback to API
+    if (!products || products.length === 0) load();
+    return () => { ignore = true; };
+  }, [productId, products]);
+
+  const cols = (products && products.length ? products : similar).slice(0, 5);
   if (!cols.length) return null;
 
   const headers = [
@@ -45,7 +65,7 @@ const ComparisonTable = ({ products = [] as ProductLite[] }: { products?: Produc
               <td className="px-4 py-3 max-w-xs">
                 <div className="font-medium text-gray-900 line-clamp-2">{p.title}</div>
               </td>
-              <td className="px-4 py-3 text-gray-900">{p.price ? `$${p.price.toFixed(2)}` : '-'}</td>
+              <td className="px-4 py-3 text-gray-900">{p.price != null ? countryService.formatLocalCurrency(p.price) : '-'}</td>
               <td className="px-4 py-3 text-gray-700">{p.ratings?.average ? `${p.ratings.average}★` : '-'}</td>
               <td className="px-4 py-3 text-gray-700">{p.brand || '-'}</td>
               <td className="px-4 py-3 text-gray-700">{p.features?.[0] || '-'}</td>

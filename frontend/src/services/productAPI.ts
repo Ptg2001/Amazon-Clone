@@ -3,11 +3,13 @@ import api from './api';
 const productAPI = {
   // Products
   getProducts: (params) => api.get('/products', { params }),
-  getProduct: (id) => api.get(`/products/${id}`),
+  getProduct: (id, currency?: string) => api.get(`/products/${id}`, { params: currency ? { currency } : undefined }),
+  getSimilar: (id) => api.get(`/products/${id}/similar`),
   createProduct: (productData) => api.post('/products', productData),
   updateProduct: (id, productData) => api.put(`/products/${id}`, productData),
   deleteProduct: (id) => api.delete(`/products/${id}`),
   addReview: (id, reviewData) => api.post(`/products/${id}/reviews`, reviewData),
+  addQuestion: (id, data) => api.post(`/products/${id}/qna`, data),
 
   // Categories
   getCategories: (params) => api.get('/categories', { params }),

@@ -30,6 +30,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 	useEffect(() => {
 		const load = async () => {
 			try {
+				const token = localStorage.getItem('token');
+				if (!token) return; // skip request if not authenticated
 				const res = await cartAPI.getCart();
 				const cart = res?.data?.data?.cart;
 				if (cart) {

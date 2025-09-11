@@ -7,6 +7,7 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const { protect, checkOwnership } = require('../middleware/auth');
 const { handleValidationErrors, isValidObjectId } = require('../middleware/validation');
+const axios = require('axios');
 
 const router = express.Router();
 
@@ -29,6 +30,105 @@ router.get('/profile', protect, async (req, res) => {
       success: false,
       message: 'Server error while fetching profile'
     });
+  }
+});
+
+// Payment Methods
+// @route   GET /api/users/payment-methods
+// @desc    Get user's payment methods
+// @access  Private
+router.get('/payment-methods', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('paymentMethods');
+    return res.json({ success: true, data: { paymentMethods: user?.paymentMethods || [] } });
+  } catch (error) {
+    console.error('Get payment methods error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while fetching payment methods' });
+  }
+});
+
+// @route   POST /api/users/payment-methods
+// @desc    Add a new payment method
+// @access  Private
+router.post('/payment-methods', protect, [
+  body('type').isIn(['card', 'paypal', 'amazon_pay']).withMessage('Invalid payment method type'),
+  body('cardNumber').optional().isLength({ min: 4 }).withMessage('Card number must be at least last 4'),
+  body('expiryMonth').optional().isString(),
+  body('expiryYear').optional().isString(),
+  body('cardHolderName').optional().isString(),
+  body('isDefault').optional().isBoolean(),
+], handleValidationErrors, async (req, res) => {
+  try {
+    const method = req.body;
+    if (method.isDefault) {
+      await User.findByIdAndUpdate(req.user._id, { $set: { 'paymentMethods.$[].isDefault': false } });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $push: { paymentMethods: method } },
+      { new: true }
+    ).select('paymentMethods');
+    return res.status(201).json({ success: true, message: 'Payment method added', data: { paymentMethods: user.paymentMethods } });
+  } catch (error) {
+    console.error('Add payment method error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while adding payment method' });
+  }
+});
+
+// @route   PUT /api/users/payment-methods/:methodId
+// @desc    Update a payment method
+// @access  Private
+router.put('/payment-methods/:methodId', protect, [
+  body('cardHolderName').optional().isString(),
+  body('expiryMonth').optional().isString(),
+  body('expiryYear').optional().isString(),
+  body('isDefault').optional().isBoolean(),
+], handleValidationErrors, async (req, res) => {
+  try {
+    const { methodId } = req.params;
+    if (!isValidObjectId(methodId)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment method ID' });
+    }
+    const update = req.body || {};
+    if (update.isDefault) {
+      await User.findByIdAndUpdate(req.user._id, { $set: { 'paymentMethods.$[].isDefault': false } });
+    }
+    const user = await User.findOneAndUpdate(
+      { _id: req.user._id, 'paymentMethods._id': methodId },
+      { $set: Object.keys(update).reduce((acc, key) => { acc[`paymentMethods.$.${key}`] = update[key]; return acc; }, {}) },
+      { new: true }
+    ).select('paymentMethods');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Payment method not found' });
+    }
+    return res.json({ success: true, message: 'Payment method updated', data: { paymentMethods: user.paymentMethods } });
+  } catch (error) {
+    console.error('Update payment method error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while updating payment method' });
+  }
+});
+
+// @route   DELETE /api/users/payment-methods/:methodId
+// @desc    Delete a payment method
+// @access  Private
+router.delete('/payment-methods/:methodId', protect, async (req, res) => {
+  try {
+    const { methodId } = req.params;
+    if (!isValidObjectId(methodId)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment method ID' });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $pull: { paymentMethods: { _id: methodId } } },
+      { new: true }
+    ).select('paymentMethods');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    return res.json({ success: true, message: 'Payment method removed', data: { paymentMethods: user.paymentMethods } });
+  } catch (error) {
+    console.error('Delete payment method error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while deleting payment method' });
   }
 });
 
@@ -588,6 +688,61 @@ router.get('/stats', protect, async (req, res) => {
   }
 });
 
+// @route   GET /api/users/fx-rates
+// @desc    Get live FX rates (base USD) cached for 1 hour
+// @access  Public
+let cachedFx = { ts: 0, rates: {} } as any;
+router.get('/fx-rates', async (_req, res) => {
+  try {
+    const now = Date.now();
+    if (cachedFx.ts && now - cachedFx.ts < 60 * 60 * 1000 && cachedFx.rates && Object.keys(cachedFx.rates).length) {
+      return res.json({ success: true, data: { base: 'USD', rates: cachedFx.rates, cached: true } });
+    }
+
+    const apiKey = process.env.EXCHANGE_RATES_API_KEY;
+    // Use open.er-api.com free endpoint (no key) as fallback
+    const url = apiKey
+      ? `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`
+      : 'https://open.er-api.com/v6/latest/USD';
+    const { data } = await axios.get(url, { timeout: 8000 });
+    const rates = data?.conversion_rates || data?.rates || {};
+    if (!rates || Object.keys(rates).length === 0) throw new Error('No rates');
+    cachedFx = { ts: now, rates };
+    return res.json({ success: true, data: { base: 'USD', rates, cached: false } });
+  } catch (e) {
+    console.error('FX rates error:', e?.message || e);
+    // Serve last cached if available
+    if (cachedFx.rates && Object.keys(cachedFx.rates).length) {
+      return res.json({ success: true, data: { base: 'USD', rates: cachedFx.rates, cached: true } });
+    }
+    return res.status(503).json({ success: false, message: 'FX service unavailable' });
+  }
+});
+
+// @route   GET /api/users/geo
+// @desc    Detect user country from IP (server-side to avoid CORS)
+// @access  Public
+router.get('/geo', async (req, res) => {
+  try {
+    // Prefer ipapi.co; fallback to ipwho.is
+    let code: string | undefined;
+    try {
+      const { data } = await axios.get('https://ipapi.co/json/', { timeout: 6000 });
+      code = (data && (data.country || data.country_code)) as string | undefined;
+    } catch (_e) {
+      const { data } = await axios.get('https://ipwho.is/', { timeout: 6000 });
+      code = (data && (data.country_code || data.countryCode)) as string | undefined;
+    }
+    if (!code || typeof code !== 'string') throw new Error('Geo lookup failed');
+    return res.json({ success: true, data: { countryCode: code.toUpperCase() } });
+  } catch (error) {
+    console.error('Geo detect error:', error?.message || error);
+    // Graceful fallback
+    return res.json({ success: true, data: { countryCode: 'US' } });
+  }
+});
+
 module.exports = router;
+
 
 

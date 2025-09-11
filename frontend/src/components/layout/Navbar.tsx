@@ -40,6 +40,7 @@ const Navbar = () => {
     let mounted = true;
     const loadCountry = async () => {
       try {
+        await countryService.refreshFxRates();
         const country = await countryService.detectCountry();
         if (mounted) setCurrentCountry(country as Country);
       } catch (_error) {
@@ -326,7 +327,7 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 sm:gap-8 py-2 overflow-x-auto no-scrollbar">
             {/* All Menu */}
-            <button className="flex items-center space-x-1 hover:text-gray-300 transition-colors border border-transparent hover:border-white px-2 py-1">
+            <button onClick={() => navigate('/products')} className="flex items-center space-x-1 hover:text-gray-300 transition-colors border border-transparent hover:border-white px-2 py-1">
               <FiMenu className="h-4 w-4" />
               <span className="font-medium">All</span>
             </button>
@@ -335,9 +336,9 @@ const Navbar = () => {
             <Link to="/deals" className="hover:text-gray-300 transition-colors">
               Today's Deals
             </Link>
-            <Link to="/prime" className="hover:text-gray-300 transition-colors">
+            <a href="https://www.primevideo.com" target="_blank" rel="noreferrer" className="hover:text-gray-300 transition-colors">
               Prime Video
-            </Link>
+            </a>
             <Link to="/registry" className="hover:text-gray-300 transition-colors">
               Registry
             </Link>

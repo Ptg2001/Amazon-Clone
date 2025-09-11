@@ -1,4 +1,5 @@
 import React from 'react';
+import countryService from '../../services/countryService';
 
 type Item = { _id: string; title: string; price?: number; images?: { url: string }[] };
 
@@ -6,6 +7,7 @@ const FrequentlyBoughtTogether = ({ main, items = [] as Item[] }: { main: Item; 
   if (!main || !items.length) return null;
   const candidates = items.slice(0, 2);
   const total = [main, ...candidates].reduce((s, p) => s + (p.price || 0), 0);
+  const format = (v: number) => countryService.formatLocalCurrency(v || 0);
 
   return (
     <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -23,7 +25,7 @@ const FrequentlyBoughtTogether = ({ main, items = [] as Item[] }: { main: Item; 
         </div>
         <div className="ml-auto min-w-[220px]">
           <div className="text-sm text-gray-700">Total price:</div>
-          <div className="text-2xl font-semibold text-gray-900">${total.toFixed(2)}</div>
+          <div className="text-2xl font-semibold text-gray-900">{format(total)}</div>
           <button className="mt-3 w-full bg-amazon-orange text-white rounded-md px-4 py-2 hover:bg-orange-600">Add all to Cart</button>
         </div>
       </div>

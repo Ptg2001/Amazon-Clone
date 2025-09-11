@@ -8,6 +8,8 @@ import ProductImageGallery from './ProductImageGallery';
 import BuyBox from './BuyBox';
 import Variations from './Variations';
 import countryService from '../../services/countryService';
+import { setCartFromServer } from '../../store/slices/cartSlice';
+// duplicate removed
 
 const ProductDetails = ({ product }) => {
   const dispatch = useDispatch();
@@ -39,12 +41,7 @@ const ProductDetails = ({ product }) => {
     }
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
+  const formatPrice = (price) => countryService.formatLocalCurrency(price);
 
   const renderStars = (rating) => {
     const stars = [];
@@ -289,12 +286,70 @@ const ProductDetails = ({ product }) => {
         </div>
 
         {/* Right: Buy Box */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 hidden lg:block">
           <BuyBox product={product} selectedVariant={selectedVariations} />
         </div>
       </div>
+
+      {/* Mobile/Tablet sticky buy bar */}
+      <MobileBuyBar
+        product={product}
+        selectedVariant={selectedVariations}
+      />
     </div>
   );
 };
 
 export default ProductDetails;
+
+function MobileBuyBar({ product, selectedVariant }: { product: any; selectedVariant?: Record<string, string> }) {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state: any) => state.auth?.isAuthenticated);
+
+  const handleAddToCart = async (goCheckout?: boolean) => {
+    try {
+      const variant = selectedVariant && Object.keys(selectedVariant || {}).length > 0 ? selectedVariant : ((product as any).selectedVariations || null);
+      await cartAPI.addItem(product._id, 1, variant);
+      const res = await cartAPI.getCart();
+      dispatch(setCartFromServer(res?.data?.data?.cart));
+      toast.success('Added to cart', { duration: 1500 });
+      if (goCheckout) {
+        window.location.assign('/checkout');
+      }
+    } catch (e: any) {
+      const msg = e?.response?.data?.message || e?.message || 'Failed to add to cart';
+      toast.error(msg);
+    }
+  };
+
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price || 0);
+
+  return (
+    <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="text-base font-semibold text-gray-900 truncate">{formatPrice(product?.price)}</div>
+          {product?.originalPrice && product.originalPrice > product.price && (
+            <div className="text-xs text-green-700">Save {formatPrice(product.originalPrice - product.price)}</div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => handleAddToCart(false)}
+          className="px-4 py-2 rounded-md bg-amazon-orange text-white text-sm font-medium hover:bg-orange-600"
+        >
+          Add to Cart
+        </button>
+        <button
+          type="button"
+          onClick={() => handleAddToCart(true)}
+          className="px-4 py-2 rounded-md bg-orange-500 text-white text-sm font-medium hover:bg-orange-600"
+        >
+          Buy Now
+        </button>
+      </div>
+      <div className="h-[env(safe-area-inset-bottom,0px)]" />
+    </div>
+  );
+}

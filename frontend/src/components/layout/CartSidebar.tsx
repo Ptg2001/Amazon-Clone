@@ -27,11 +27,19 @@ const CartSidebar = ({ isOpen, onClose }) => {
   };
 
   const handleRemoveItem = async (productId, variant) => {
+    // Optimistic update for better UX
+    dispatch(removeFromCart({ productId, variant }));
     try {
       await cartAPI.removeItem(productId, variant);
       const res = await cartAPI.getCart();
       dispatch(setCartFromServer(res?.data?.data?.cart));
-    } catch (_e) {}
+    } catch (_e) {
+      // Re-sync with server if request failed
+      try {
+        const res = await cartAPI.getCart();
+        dispatch(setCartFromServer(res?.data?.data?.cart));
+      } catch (__e) {}
+    }
   };
 
   const handleClearCart = async () => {
@@ -152,6 +160,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
                     {/* Remove Button */}
                     <button
+                      type="button"
                       onClick={() => handleRemoveItem(item.product._id, item.variant)}
                       className="p-1 text-gray-400 hover:text-red-600 transition-colors"
                     >

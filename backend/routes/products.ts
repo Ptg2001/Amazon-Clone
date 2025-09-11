@@ -8,6 +8,45 @@ const { protect, authorize, optionalAuth } = require('../middleware/auth');
 const { handleValidationErrors, isValidObjectId } = require('../middleware/validation');
 
 const router = express.Router();
+const axios = require('axios');
+
+// lightweight FX cache for product routes
+let fxCache = { ts: 0, rates: {} } as any;
+async function getUsdRates() {
+  const now = Date.now();
+  if (fxCache.ts && now - fxCache.ts < 60 * 60 * 1000 && fxCache.rates && Object.keys(fxCache.rates).length) {
+    return fxCache.rates;
+  }
+  try {
+    const apiKey = process.env.EXCHANGE_RATES_API_KEY;
+    const url = apiKey
+      ? `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`
+      : 'https://open.er-api.com/v6/latest/USD';
+    const { data } = await axios.get(url, { timeout: 8000 });
+    const rates = data?.conversion_rates || data?.rates || {};
+    if (rates && Object.keys(rates).length) {
+      fxCache = { ts: now, rates };
+      return rates;
+    }
+  } catch (e) {
+    // fallthrough
+  }
+  return fxCache.rates || {};
+}
+
+function convertPriceFields(product: any, rate: number) {
+  if (!product || !rate || rate === 1) return product;
+  const clone = { ...(product.toObject ? product.toObject() : product) } as any;
+  if (typeof clone.price === 'number') clone.price = parseFloat((clone.price * rate).toFixed(2));
+  if (typeof clone.originalPrice === 'number') clone.originalPrice = parseFloat((clone.originalPrice * rate).toFixed(2));
+  if (Array.isArray(clone.items)) {
+    clone.items = clone.items.map((it: any) => ({
+      ...it,
+      price: typeof it.price === 'number' ? parseFloat((it.price * rate).toFixed(2)) : it.price,
+    }));
+  }
+  return clone;
+}
 
 // @route   GET /api/products
 // @desc    Get all products with filtering, sorting, and pagination
@@ -172,6 +211,7 @@ router.get('/', [
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
+    const { currency } = req.query as any;
 
     if (!isValidObjectId(id)) {
       return res.status(400).json({
@@ -180,9 +220,10 @@ router.get('/:id', optionalAuth, async (req, res) => {
       });
     }
 
-    const product = await Product.findById(id)
+    let product = await Product.findById(id)
       .populate('category', 'name slug')
-      .populate('reviews.user', 'firstName lastName');
+      .populate('reviews.user', 'firstName lastName')
+      .populate('qna.user', 'firstName lastName');
 
     if (!product) {
       return res.status(404).json({
@@ -192,7 +233,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
     }
 
     // Get related products
-    const relatedProducts = await Product.find({
+    let relatedProducts = await Product.find({
       category: product.category._id,
       _id: { $ne: product._id },
       isActive: true
@@ -201,13 +242,17 @@ router.get('/:id', optionalAuth, async (req, res) => {
       .select('title price images ratings')
       .lean();
 
-    res.json({
-      success: true,
-      data: {
-        product,
-        relatedProducts
+    // currency conversion if requested
+    if (currency && String(currency).toUpperCase() !== 'USD') {
+      const rates = await getUsdRates();
+      const rate = rates[String(currency).toUpperCase()] || 1;
+      if (rate && rate !== 1) {
+        product = convertPriceFields(product, rate);
+        relatedProducts = relatedProducts.map((p: any) => convertPriceFields(p, rate));
       }
-    });
+    }
+
+    res.json({ success: true, data: { product, relatedProducts } });
   } catch (error) {
     console.error('Get product error:', error);
     res.status(500).json({
@@ -505,13 +550,14 @@ router.post('/:id/reviews', protect, [
       });
     }
 
-    // Add review
+    // Add review with timestamp
     product.reviews.push({
       user: req.user._id,
       rating,
       comment,
       title,
-      verified: true
+      verified: true,
+      createdAt: new Date()
     });
 
     await product.save();
@@ -527,6 +573,74 @@ router.post('/:id/reviews', protect, [
       success: false,
       message: 'Server error while adding review'
     });
+  }
+});
+
+// @route   POST /api/products/:id/qna
+// @desc    Add customer question
+// @access  Private
+router.post('/:id/qna', protect, [
+  body('question')
+    .trim()
+    .notEmpty()
+    .withMessage('Question is required')
+    .isLength({ max: 500 })
+    .withMessage('Question cannot exceed 500 characters')
+], handleValidationErrors, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { question } = req.body;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid product ID' });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    product.qna.unshift({ user: req.user._id, question, createdAt: new Date() });
+    await product.save();
+
+    const populated = await Product.findById(id)
+      .populate('qna.user', 'firstName lastName');
+
+    return res.status(201).json({ success: true, message: 'Question submitted', data: { product: populated } });
+  } catch (error) {
+    console.error('Add question error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while adding question' });
+  }
+});
+
+// @route   GET /api/products/:id/similar
+// @desc    Get similar (related) products in real-time
+// @access  Public
+router.get('/:id/similar', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid product ID' });
+    }
+
+    const product = await Product.findById(id).select('category');
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const items = await Product.find({
+      category: product.category,
+      _id: { $ne: id },
+      isActive: true
+    })
+      .limit(5)
+      .select('title price images ratings brand features')
+      .lean();
+
+    return res.json({ success: true, data: { items } });
+  } catch (error) {
+    console.error('Get similar products error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while fetching similar products' });
   }
 });
 

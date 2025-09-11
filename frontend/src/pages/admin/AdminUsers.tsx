@@ -102,22 +102,22 @@ const AdminUsers = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       User
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                       Role
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                       Join Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -125,11 +125,11 @@ const AdminUsers = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="6" className="px-6 py-12 text-center text-gray-500">Loading users...</td>
+                      <td colSpan="6" className="px-4 sm:px-6 py-12 text-center text-gray-500">Loading users...</td>
                     </tr>
                   ) : users.map((user) => (
                     <tr key={user._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
                             <FiUser className="h-5 w-5 text-gray-500" />
@@ -140,13 +140,13 @@ const AdminUsers = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                         <div className="flex items-center text-sm text-gray-900">
                           <FiMail className="h-4 w-4 text-gray-400 mr-2" />
                           {user.email}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           user.role === 'admin' 
                             ? 'bg-purple-100 text-purple-800' 
@@ -155,13 +155,13 @@ const AdminUsers = () => {
                           {user.role}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                         <div className="flex items-center text-sm text-gray-500">
                           <FiCalendar className="h-4 w-4 text-gray-400 mr-2" />
                           {new Date(user.createdAt).toLocaleDateString()}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           user.isEmailVerified 
                             ? 'bg-green-100 text-green-800' 
@@ -170,7 +170,7 @@ const AdminUsers = () => {
                           {user.isEmailVerified ? 'verified' : 'unverified'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
                             className="text-amazon-orange hover:text-orange-600 disabled:opacity-50"

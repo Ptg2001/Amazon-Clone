@@ -8,6 +8,7 @@ import { addToCart, setCartFromServer } from '../../store/slices/cartSlice';
 import cartAPI from '../../services/cartAPI';
 import { addToWishlist, removeFromWishlist } from '../../store/slices/wishlistSlice';
 import toast from 'react-hot-toast';
+import countryService from '../../services/countryService';
 
 const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -30,7 +31,7 @@ const ProductCard = ({ product }) => {
       await cartAPI.addItem(product._id, 1);
       const res = await cartAPI.getCart();
       dispatch(setCartFromServer(res?.data?.data?.cart));
-      toast.success('Added to cart');
+      toast.success('Added to cart', { duration: 1500 });
     } catch (_e) {
       toast.error('Failed to add to cart');
     }
@@ -61,12 +62,7 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
+  const formatPrice = (price) => countryService.formatPrice(price);
 
   const renderStars = (rating) => {
     const stars = [];
@@ -110,13 +106,15 @@ const ProductCard = ({ product }) => {
   const displayOriginal = hasValidOriginal ? product.originalPrice : (pseudoOriginal ?? null);
   const savingsAmount = displayOriginal ? Math.max(0, displayOriginal - product.price) : 0;
 
+  const productId = (product as any)?._id || (product as any)?.id;
+
   return (
     <div
       className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 group h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link to={`/product/${product._id}`} className="flex flex-col h-full">
+      <Link to={productId ? `/product/${productId}` : '#'} className={`flex flex-col h-full ${!productId ? 'pointer-events-none opacity-60' : ''}`}>
         {/* Product Image */}
         <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 flex items-center justify-center min-h-[160px]">
           <LazyLoadImage

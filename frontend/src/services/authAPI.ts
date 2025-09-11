@@ -24,6 +24,12 @@ const authAPI = {
   // User orders
   getUserOrders: (params) => api.get('/users/orders', { params }),
   getUserStats: () => api.get('/users/stats'),
+
+  // Payment methods
+  getPaymentMethods: () => api.get('/users/payment-methods'),
+  addPaymentMethod: (data) => api.post('/users/payment-methods', data),
+  updatePaymentMethod: (id, data) => api.put(`/users/payment-methods/${id}`, data),
+  deletePaymentMethod: (id) => api.delete(`/users/payment-methods/${id}`),
 };
 
 export default authAPI;

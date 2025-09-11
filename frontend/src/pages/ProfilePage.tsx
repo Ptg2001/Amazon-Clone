@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector } from 'react-redux';
 import { FiUser, FiMail, FiPhone, FiEdit3 } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 const ProfilePage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -22,10 +23,10 @@ const ProfilePage = () => {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
-                  <button className="text-amazon-orange hover:text-orange-600 flex items-center space-x-1">
+                  <Link to="/profile/settings" className="text-amazon-orange hover:text-orange-600 flex items-center space-x-1">
                     <FiEdit3 className="h-4 w-4" />
                     <span>Edit</span>
-                  </button>
+                  </Link>
                 </div>
                 
                 <div className="space-y-4">
@@ -74,8 +75,11 @@ const ProfilePage = () => {
                   <a href="/addresses" className="block text-amazon-orange hover:text-orange-600">
                     Manage Addresses
                   </a>
-                  <a href="/payment-methods" className="block text-amazon-orange hover:text-orange-600">
+                  <a href="/profile/payment-methods" className="block text-amazon-orange hover:text-orange-600">
                     Payment Methods
+                  </a>
+                  <a href="/profile/settings" className="block text-amazon-orange hover:text-orange-600">
+                    Account Settings
                   </a>
                 </div>
               </div>

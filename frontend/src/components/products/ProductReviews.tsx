@@ -3,8 +3,9 @@ import { useForm } from 'react-hook-form';
 import { FiStar, FiThumbsUp, FiUser } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import productAPI from '../../services/productAPI';
 
-const ProductReviews = ({ product }) => {
+const ProductReviews = ({ product, onReviewSubmitted }: { product: any; onReviewSubmitted?: () => void }) => {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
@@ -32,13 +33,19 @@ const ProductReviews = ({ product }) => {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const payload = {
+        rating: parseInt(data.rating, 10),
+        title: data.title,
+        comment: data.comment,
+      };
+      await productAPI.addReview(product._id, payload);
       toast.success('Review submitted successfully!');
       reset();
       setShowReviewForm(false);
+      onReviewSubmitted && onReviewSubmitted();
     } catch (error) {
-      toast.error('Failed to submit review. Please try again.');
+      const msg = (error as any)?.response?.data?.message || 'Failed to submit review. Please try again.';
+      toast.error(msg);
     }
   };
 
@@ -58,7 +65,10 @@ const ProductReviews = ({ product }) => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const d = dateString ? new Date(dateString) : new Date();
+    const valid = d instanceof Date && !isNaN(d.getTime());
+    const toShow = valid ? d : new Date();
+    return toShow.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
