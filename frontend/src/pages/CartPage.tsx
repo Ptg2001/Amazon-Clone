@@ -7,6 +7,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { setCartFromServer } from '../store/slices/cartSlice';
 import cartAPI from '../services/cartAPI';
+import countryService from '../services/countryService';
 import { useCart } from '../contexts/CartContext';
 
 const CartPage = () => {
@@ -31,12 +32,14 @@ const CartPage = () => {
     dispatch(setCartFromServer(res?.data?.data?.cart));
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
+  const [countryTick, setCountryTick] = React.useState(0);
+  React.useEffect(() => {
+    const onChange = () => setCountryTick((v) => v + 1);
+    window.addEventListener('country:changed', onChange as any);
+    return () => window.removeEventListener('country:changed', onChange as any);
+  }, []);
+
+  const formatPrice = (price) => countryService.formatPrice(price);
 
   if (items.length === 0) {
     return (

@@ -7,11 +7,18 @@ import { useCart } from '../contexts/CartContext';
 import { clearCart } from '../store/slices/cartSlice';
 import { useDispatch } from 'react-redux';
 import orderAPI from '../services/orderAPI';
+import countryService from '../services/countryService';
 import toast from 'react-hot-toast';
 
 const CheckoutPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { items, totalAmount } = useCart();
+  const [countryTick, setCountryTick] = React.useState(0);
+  React.useEffect(() => {
+    const onChange = () => setCountryTick((v) => v + 1);
+    window.addEventListener('country:changed', onChange as any);
+    return () => window.removeEventListener('country:changed', onChange as any);
+  }, []);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   
@@ -66,7 +73,7 @@ const CheckoutPage = () => {
       }
 
       // 2) Ask backend to create Razorpay order
-      const amountToPay = total; // backend converts to paise
+      const amountToPay = total; // local already converted from server cart; backend handles gateway currency
       const rzpOrderRes = await orderAPI.createPaymentIntent({ orderId, amount: amountToPay });
       const rzpData = rzpOrderRes.data.data;
 
@@ -132,16 +139,12 @@ const CheckoutPage = () => {
     }
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
+  // Prices in cart are stored in USD; convert and format according to current location
+  const formatPrice = (price) => countryService.formatPrice(price);
 
   const subtotal = totalAmount;
   const tax = subtotal * 0.08;
-  const shipping = subtotal >= 50 ? 0 : 9.99;
+  const shipping = 0;
   const total = subtotal + tax + shipping;
 
   return (

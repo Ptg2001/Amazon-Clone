@@ -12,11 +12,20 @@ import {
 import { useCart } from '../../contexts/CartContext';
 import cartAPI from '../../services/cartAPI';
 import { setCartFromServer } from '../../store/slices/cartSlice';
+import countryService from '../../services/countryService';
 
 const CartSidebar = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items, totalItems, totalAmount } = useCart();
+
+  // Re-render when country changes to refresh currency
+  const [countryTick, setCountryTick] = React.useState(0);
+  React.useEffect(() => {
+    const onChange = () => setCountryTick((v) => v + 1);
+    window.addEventListener('country:changed', onChange as any);
+    return () => window.removeEventListener('country:changed', onChange as any);
+  }, []);
 
   const handleQuantityChange = async (productId, variant, newQuantity) => {
     try {
@@ -128,7 +137,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                       )}
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-sm font-bold text-amazon-orange">
-                          ${item.price.toFixed(2)}
+                          {countryService.formatPrice(item.price)}
                         </span>
                         <div className="flex items-center space-x-2">
                           <button
@@ -178,7 +187,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
               {/* Total */}
               <div className="flex items-center justify-between text-lg font-semibold">
                 <span>Total:</span>
-                <span className="text-amazon-orange">${totalAmount.toFixed(2)}</span>
+                <span className="text-amazon-orange">{countryService.formatPrice(totalAmount)}</span>
               </div>
 
               {/* Action Buttons */}
