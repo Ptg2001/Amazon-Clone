@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="40" viewBox="0 0 880 160" role="img" aria-label="NexaCart">
+  <defs>
+    <linearGradient id="nc-blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="nc-silver" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e5e7eb"/>
+      <stop offset="100%" stop-color="#9ca3af"/>
+    </linearGradient>
+    <filter id="nc-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity=".25"/>
+    </filter>
+  </defs>
+
+  <!-- Wordmark -->
+  <g filter="url(#nc-shadow)">
+    <text x="10" y="112" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="108" font-weight="800" fill="url(#nc-silver)">Nexa</text>
+    <text x="360" y="112" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="108" font-weight="900" fill="url(#nc-blue)">Cart</text>
+  </g>
+
+  <!-- Cart emblem over the C -->
+  <g transform="translate(360,18)">
+    <path d="M64 22h78l-7 40H86l-6 16H62" fill="none" stroke="url(#nc-blue)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="82" cy="96" r="8" fill="url(#nc-blue)"/>
+    <circle cx="130" cy="96" r="8" fill="url(#nc-blue)"/>
+    <path d="M60 18l4 14" stroke="url(#nc-blue)" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <!-- Subtle baseline shadow -->
+  <ellipse cx="440" cy="148" rx="340" ry="10" fill="#0b1b3a" opacity=".08"/>
+</svg>
+
+
