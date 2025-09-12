@@ -19,4 +19,18 @@ export async function sendChatMessage(params: {
   return data.data.reply as string
 }
 
+export type ChatResult = { text: string; items?: { title: string; link: string }[] }
+
+export async function sendChatMessageWithResults(params: {
+  message: string
+  history?: ChatHistoryItem[]
+  model?: string
+  apiKeyOverride?: string
+}): Promise<{ reply: string; results?: string[] }> {
+  const { message, history = [], model, apiKeyOverride } = params
+  const { data } = await api.post('/chat', { message, history, model, apiKey: apiKeyOverride })
+  if (!data?.success) throw new Error(data?.message || 'Chat failed')
+  return { reply: data.data.reply as string, results: data.data.results as string[] | undefined }
+}
+
 

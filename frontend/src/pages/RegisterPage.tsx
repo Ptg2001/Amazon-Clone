@@ -50,14 +50,14 @@ const RegisterPage = () => {
   return (
     <>
       <Helmet>
-        <title>Create Account - Amazon Clone</title>
-        <meta name="description" content="Create your Amazon account" />
+        <title>Create Account - NexaCart</title>
+        <meta name="description" content="Create your NexaCart account" />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <Link to="/" className="flex justify-center">
-            <span className="text-3xl font-bold text-amazon-orange">amazon</span>
+            <img src="/nexacart-logo.svg" alt="NexaCart" className="h-10 w-auto" />
           </Link>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create your account

@@ -71,7 +71,7 @@ const AdminDashboard = () => {
   return (
     <>
       <Helmet>
-        <title>Admin Dashboard - Amazon Clone</title>
+        <title>Admin Dashboard - NexaCart</title>
       </Helmet>
       
       <div className="min-h-screen bg-gray-50 py-8">

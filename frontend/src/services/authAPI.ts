@@ -8,6 +8,8 @@ const authAPI = {
   getCurrentUser: () => api.get('/auth/me'),
   updateProfile: (userData) => api.put('/auth/profile', userData),
   changePassword: (passwordData) => api.put('/auth/change-password', passwordData),
+  forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) => api.post('/auth/reset-password', { token, password }),
 
   // User management
   getUserProfile: () => api.get('/users/profile'),

@@ -12,8 +12,8 @@ const CustomersAlsoBought = ({ items = [] as Item[] }: { items?: Item[] }) => {
       <div className="grid grid-flow-col auto-cols-[180px] gap-4 overflow-x-auto">
         {items.map((p) => (
           <Link key={p._id} to={`/product/${p._id}`} className="group border border-gray-200 rounded-md p-3 hover:shadow-sm">
-            <div className="aspect-square w-full overflow-hidden rounded bg-white">
-              <img src={p.images?.[0]?.url || '/images/placeholder.jpg'} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            <div className="aspect-square w-full overflow-hidden rounded bg-white flex items-center justify-center">
+              <img src={p.images?.[0]?.url || '/images/placeholder.jpg'} alt={p.title} className="w-full h-full object-contain p-2 group-hover:scale-[1.02] transition-transform" />
             </div>
             <div className="mt-1 text-sm font-medium text-gray-900 line-clamp-2">{p.title}</div>
             {p.price != null && <div className="mt-1 text-amazon-orange font-semibold">{countryService.formatLocalCurrency(p.price)}</div>}

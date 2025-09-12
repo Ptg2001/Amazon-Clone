@@ -64,7 +64,7 @@ const PaymentMethodsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <Helmet>
-        <title>Your Payment Methods - Amazon Clone</title>
+        <title>Your Payment Methods - NexaCart</title>
       </Helmet>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-semibold text-gray-900 mb-6">Your Payment Methods</h1>
@@ -77,7 +77,7 @@ const PaymentMethodsPage = () => {
                 <div key={m._id} className="flex items-center justify-between border border-gray-200 rounded-md p-4">
                   <div>
                     <div className="text-gray-900 font-medium">
-                      {m.type === 'card' ? `Card •••• ${m.cardNumber}` : m.type === 'paypal' ? 'PayPal' : 'Amazon Pay'}
+                      {m.type === 'card' ? `Card •••• ${m.cardNumber}` : m.type === 'paypal' ? 'PayPal' : 'NexaCart Pay'}
                     </div>
                     {m.expiryMonth && m.expiryYear && (
                       <div className="text-sm text-gray-600">Exp {m.expiryMonth}/{m.expiryYear}</div>
@@ -110,7 +110,7 @@ const PaymentMethodsPage = () => {
                 <select value={form.type as any} onChange={(e) => setForm((p) => ({ ...p, type: e.target.value as any }))} className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amazon-orange">
                   <option value="card">Card</option>
                   <option value="paypal">PayPal</option>
-                  <option value="amazon_pay">Amazon Pay</option>
+                  <option value="amazon_pay">NexaCart Pay</option>
                 </select>
               </div>
               {form.type === 'card' && (

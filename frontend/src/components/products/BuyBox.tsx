@@ -78,7 +78,7 @@ const BuyBox = ({ product, selectedVariant }: { product: any; selectedVariant?: 
             </span>
           </div>
 
-          {/* Quantity dropdown styled like Amazon */}
+          {/* Quantity dropdown styled like NexaCart */}
           <div className="text-sm">
             <select
               value={quantity}
@@ -114,11 +114,11 @@ const BuyBox = ({ product, selectedVariant }: { product: any; selectedVariant?: 
           <div className="text-xs text-gray-700 space-y-2 pt-1">
             <div className="grid grid-cols-5 gap-2">
               <span className="col-span-2 text-gray-500">Ships from</span>
-              <span className="col-span-3">Amazon.com</span>
+              <span className="col-span-3">NexaCart</span>
             </div>
             <div className="grid grid-cols-5 gap-2">
               <span className="col-span-2 text-gray-500">Sold by</span>
-              <span className="col-span-3">Amazon.com</span>
+              <span className="col-span-3">NexaCart</span>
             </div>
             <div className="grid grid-cols-5 gap-2">
               <span className="col-span-2 text-gray-500">Returns</span>

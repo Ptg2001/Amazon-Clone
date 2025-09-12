@@ -52,14 +52,14 @@ const LoginPage = () => {
   return (
     <>
       <Helmet>
-        <title>Sign In - Amazon Clone</title>
-        <meta name="description" content="Sign in to your Amazon account" />
+        <title>Sign In - NexaCart</title>
+        <meta name="description" content="Sign in to your NexaCart account" />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <Link to="/" className="flex justify-center">
-            <span className="text-3xl font-bold text-amazon-orange">amazon</span>
+            <img src="/nexacart-logo.svg" alt="NexaCart" className="h-10 w-auto" />
           </Link>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account
@@ -185,14 +185,7 @@ const LoginPage = () => {
               </div>
             </form>
 
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-md">
-              <h3 className="text-sm font-medium text-gray-900 mb-2">Demo Credentials:</h3>
-              <div className="text-xs text-gray-600 space-y-1">
-                <p><strong>Email:</strong> demo@amazon.com</p>
-                <p><strong>Password:</strong> demo123</p>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>

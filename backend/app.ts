@@ -75,6 +75,8 @@ const adminRoutes = require('./routes/admin')
 const cartRoutes = require('./routes/cart')
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const chatRoutes = require('./routes/chat')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const contentRoutes = require('./routes/content')
 
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
@@ -85,6 +87,7 @@ app.use('/api/payments', paymentRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/cart', cartRoutes)
 app.use('/api/chat', chatRoutes)
+app.use('/api/content', contentRoutes)
 
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString(), uptime: process.uptime() })

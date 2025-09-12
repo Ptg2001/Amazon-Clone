@@ -73,7 +73,7 @@ const HomePage = () => {
   // Fetch categories
   const { data: categories, isLoading: categoriesLoading } = useQuery(
     'home-categories',
-    () => productAPI.getCategories({ limit: 8 }),
+    () => productAPI.getCategories({}),
     {
       staleTime: 10 * 60 * 1000, // 10 minutes
     }
@@ -103,10 +103,10 @@ const HomePage = () => {
   return (
     <>
       <Helmet>
-        <title>Amazon Clone - Shop Online for Electronics, Books, Clothing & More</title>
+        <title>NexaCart - Shop Online for Electronics, Books, Clothing & More</title>
         <meta
           name="description"
-          content="Free shipping on millions of items. Get the best of Shopping and Entertainment with Prime. Enjoy low prices and great deals on the largest selection of everyday essentials and other products."
+          content="NexaCart offers free shipping on millions of items. Enjoy low prices and great deals across electronics, fashion, home and more."
         />
       </Helmet>
 

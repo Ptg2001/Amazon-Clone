@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { body } = require('express-validator');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
-const { sendMail, renderWelcomeEmail } = require('../middleware/email');
+const { sendMail, renderWelcomeEmail, renderPasswordResetEmail } = require('../middleware/email');
 const { handleValidationErrors, isStrongPassword, isValidEmail } = require('../middleware/validation');
 
 const router = express.Router();
@@ -297,6 +297,72 @@ router.post('/logout', protect, (req, res) => {
     success: true,
     message: 'Logged out successfully'
   });
+});
+
+// @route   POST /api/auth/forgot-password
+// @desc    Send password reset email
+// @access  Public
+router.post('/forgot-password', [
+  body('email').isEmail().withMessage('Valid email is required').normalizeEmail()
+], handleValidationErrors, async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(200).json({ success: true, message: 'If that email exists, we sent a reset link.' });
+    }
+
+    // Generate token
+    const jwtSecret = process.env.JWT_SECRET || 'devsecret';
+    const rawToken = jwt.sign({ id: user._id, typ: 'pwd' }, jwtSecret, { expiresIn: '1h' });
+    user.passwordResetToken = rawToken;
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
+    await user.save();
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const link = `${frontendUrl}/reset-password?token=${encodeURIComponent(rawToken)}`;
+    const mail = renderPasswordResetEmail(user, link);
+    await sendMail({ to: user.email, subject: mail.subject, html: mail.html });
+
+    res.json({ success: true, message: 'If that email exists, we sent a reset link.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ success: false, message: 'Server error sending reset email' });
+  }
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password using token
+// @access  Public
+router.post('/reset-password', [
+  body('token').notEmpty().withMessage('Token is required'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+], handleValidationErrors, async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    const jwtSecret = process.env.JWT_SECRET || 'devsecret';
+    let payload: any = null;
+    try {
+      payload = jwt.verify(token, jwtSecret);
+    } catch (_e) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+    }
+
+    const user = await User.findById(payload?.id).select('+password');
+    if (!user || user.passwordResetToken !== token || (user.passwordResetExpires && user.passwordResetExpires < new Date())) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+    }
+
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    res.json({ success: true, message: 'Password has been reset successfully' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ success: false, message: 'Server error resetting password' });
+  }
 });
 
 module.exports = router;

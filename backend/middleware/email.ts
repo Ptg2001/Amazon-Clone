@@ -26,13 +26,13 @@ async function sendMail({ to, subject, html, text, attachments }) {
     });
     return { skipped: true };
   }
-  const from = process.env.MAIL_FROM || process.env.EMAIL_FROM || `AmazonVirtua <${SMTP_USER || ''}>`;
+  const from = process.env.MAIL_FROM || process.env.EMAIL_FROM || `NexaCart <${SMTP_USER || ''}>`;
   return transporter.sendMail({ from, to, subject, html, text, attachments });
 }
 
 function renderWelcomeEmail(user) {
   return {
-    subject: 'Welcome to AmazonVirtua',
+    subject: 'Welcome to NexaCart',
     html: `<h2>Welcome, ${user.firstName}!</h2><p>Thanks for signing up. Happy shopping!</p>`,
   };
 }
@@ -70,7 +70,7 @@ function renderOrderEmail(order) {
   <div style="font-family:Arial,Helvetica,sans-serif; color:#111;">
     <div style="max-width:680px;margin:0 auto;border:1px solid #eee;border-radius:8px;overflow:hidden">
       <div style="background:#232f3e;color:#fff;padding:16px 20px;">
-        <div style="font-size:18px;font-weight:700;">AmazonVirtua</div>
+        <div style="font-size:18px;font-weight:700;">NexaCart</div>
         <div style="font-size:13px;opacity:.9;">Order Confirmation</div>
       </div>
 
@@ -135,6 +135,30 @@ function generateInvoicePdf(order) {
 
 module.exports = { sendMail, renderWelcomeEmail, renderOrderEmail, generateInvoicePdf };
 
+function renderPasswordResetEmail(user, resetLink) {
+  const name = user?.firstName || 'there';
+  const html = `
+  <div style="font-family:Arial,Helvetica,sans-serif; color:#111;">
+    <div style="max-width:680px;margin:0 auto;border:1px solid #eee;border-radius:8px;overflow:hidden">
+      <div style="background:#232f3e;color:#fff;padding:16px 20px;">
+        <div style="font-size:18px;font-weight:700;">NexaCart</div>
+        <div style="font-size:13px;opacity:.9;">Password reset</div>
+      </div>
+      <div style="padding:20px;">
+        <p>Hi ${name},</p>
+        <p>We received a request to reset your password. Click the button below to set a new password. If you didn't request this, you can safely ignore this email.</p>
+        <div style="margin:16px 0;">
+          <a href="${resetLink}" style="background:#ffd814;border:1px solid #fcd200;border-radius:8px;color:#111;padding:10px 14px;text-decoration:none;font-weight:600;">Reset your password</a>
+        </div>
+        <p style="font-size:12px;color:#666;">This link will expire in 1 hour.</p>
+      </div>
+    </div>
+  </div>`;
+  return { subject: 'Reset your password', html };
+}
+
+module.exports.renderPasswordResetEmail = renderPasswordResetEmail;
+
 function renderStatusEmail(order, status) {
   const titleMap = {
     pending: 'We received your order',
@@ -165,7 +189,7 @@ function renderStatusEmail(order, status) {
   <div style="font-family:Arial,Helvetica,sans-serif; color:#111;">
     <div style="max-width:680px;margin:0 auto;border:1px solid #eee;border-radius:8px;overflow:hidden">
       <div style="background:#232f3e;color:#fff;padding:16px 20px;">
-        <div style="font-size:18px;font-weight:700;">AmazonVirtua</div>
+        <div style="font-size:18px;font-weight:700;">NexaCart</div>
         <div style="font-size:13px;opacity:.9;">Order update</div>
       </div>
       <div style="padding:20px;">

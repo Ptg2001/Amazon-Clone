@@ -19,12 +19,12 @@ const RelatedProducts = ({ products }) => {
             to={`/product/${product._id}`}
             className="group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200"
           >
-            <div className="aspect-square overflow-hidden">
+            <div className="aspect-[4/3] overflow-hidden bg-white flex items-center justify-center">
               <LazyLoadImage
                 src={product.images?.[0]?.url || '/images/placeholder.jpg'}
                 alt={product.title}
                 effect="blur"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-contain p-2 group-hover:scale-[1.02] transition-transform duration-300"
                 placeholderSrc="/images/placeholder.jpg"
               />
             </div>

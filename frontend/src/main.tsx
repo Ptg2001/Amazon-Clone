@@ -9,6 +9,7 @@ import { Toaster } from 'react-hot-toast'
 import App from './App'
 import { store } from './store/store'
 import './index.css'
+import { I18nProvider } from './contexts/I18nContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,8 +29,9 @@ root.render(
       <QueryClientProvider client={queryClient}>
         <HelmetProvider>
           <BrowserRouter>
-            <App />
-            <Toaster
+            <I18nProvider>
+              <App />
+              <Toaster
               position="top-right"
               toastOptions={{
                 duration: 4000,
@@ -52,7 +54,8 @@ root.render(
                   },
                 },
               }}
-            />
+              />
+            </I18nProvider>
           </BrowserRouter>
         </HelmetProvider>
       </QueryClientProvider>

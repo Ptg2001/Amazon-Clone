@@ -7,13 +7,16 @@ export default {
     extend: {
       colors: {
         'amazon-orange': '#ff9900',
-        'amazon-blue': '#232f3e',
-        'amazon-dark': '#131921',
+        'amazon-blue': '#1d4ed8',
+        'amazon-dark': '#0b1b3a',
         'amazon-gray': '#f3f3f3',
         'amazon-light-gray': '#e7e7e7',
         'amazon-text': '#0f1111',
         'amazon-text-light': '#565959',
         'amazon-border': '#d5d9d9',
+        'nexa-blue': '#1d4ed8',
+        'nexa-blue-light': '#3b82f6',
+        'nexa-blue-dark': '#0b1b3a',
       },
       fontFamily: {
         'sans': ['Inter', 'system-ui', 'sans-serif'],

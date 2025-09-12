@@ -4,6 +4,7 @@ import { FiSearch, FiX } from 'react-icons/fi';
 import { useQuery } from 'react-query';
 import productAPI from '../../services/productAPI';
 import SearchSuggestions from './SearchSuggestions';
+import { useI18n } from '../../contexts/I18nContext';
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
@@ -12,6 +13,7 @@ const SearchBar = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   // Load categories for department dropdown (live data)
   const { data: categoriesData } = useQuery(
@@ -124,7 +126,7 @@ const SearchBar = () => {
               onChange={handleInputChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              placeholder="Search Amazon"
+              placeholder={t('searchPlaceholder')}
               className="w-full px-3 sm:px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amazon-orange focus:border-transparent bg-white text-gray-900 placeholder-gray-500"
             />
             

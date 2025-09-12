@@ -7,7 +7,7 @@ const NotFoundPage = () => {
   return (
     <>
       <Helmet>
-        <title>404 - Page Not Found | Amazon Clone</title>
+        <title>404 - Page Not Found | NexaCart</title>
         <meta name="description" content="The page you're looking for doesn't exist." />
       </Helmet>
 

@@ -53,7 +53,7 @@ const CategoryPage = () => {
   return (
     <>
       <Helmet>
-        <title>{`${category.name || 'Category'} - Amazon Clone`}</title>
+        <title>{`${category.name || 'Category'} - NexaCart`}</title>
         <meta name="description" content={category.description || ''} />
       </Helmet>
       

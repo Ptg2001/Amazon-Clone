@@ -28,7 +28,7 @@ const SearchPage = () => {
   return (
     <>
       <Helmet>
-        <title>{`${query ? `Search results for "${query}"` : 'Search'} - Amazon Clone`}</title>
+        <title>{`${query ? `Search results for "${query}"` : 'Search'} - NexaCart`}</title>
       </Helmet>
       
       <div className="min-h-screen bg-gray-50 py-8">

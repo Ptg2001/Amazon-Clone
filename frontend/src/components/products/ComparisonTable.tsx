@@ -60,7 +60,9 @@ const ComparisonTable = ({ products = [] as ProductLite[], productId }: { produc
           {cols.map((p) => (
             <tr key={p._id} className="border-t border-gray-100">
               <td className="px-4 py-3">
-                <img src={p.images?.[0]?.url || '/images/placeholder.jpg'} alt={p.title} className="w-16 h-16 object-cover rounded" />
+                <div className="w-16 h-16 bg-white rounded overflow-hidden flex items-center justify-center">
+                  <img src={p.images?.[0]?.url || '/images/placeholder.jpg'} alt={p.title} className="w-full h-full object-contain p-1" />
+                </div>
               </td>
               <td className="px-4 py-3 max-w-xs">
                 <div className="font-medium text-gray-900 line-clamp-2">{p.title}</div>

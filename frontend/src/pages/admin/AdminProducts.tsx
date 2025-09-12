@@ -185,7 +185,7 @@ const AdminProducts = () => {
   return (
     <>
       <Helmet>
-        <title>Manage Products - Admin - Amazon Clone</title>
+        <title>Manage Products - Admin - NexaCart</title>
       </Helmet>
       
       <div className="min-h-screen bg-gray-50 py-8">

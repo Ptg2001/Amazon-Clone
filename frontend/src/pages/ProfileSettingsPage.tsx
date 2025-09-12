@@ -42,7 +42,7 @@ const ProfileSettingsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <Helmet>
-        <title>Account Settings - Amazon Clone</title>
+        <title>Account Settings - NexaCart</title>
       </Helmet>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-semibold text-gray-900 mb-6">Account Settings</h1>

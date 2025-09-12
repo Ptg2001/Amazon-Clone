@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
@@ -10,7 +10,8 @@ const resolveCategoryImage = (category, products = []) => {
   return prod?.images?.[0]?.url || '/images/category-placeholder.jpg';
 };
 
-const CategorySection = ({ categories, isLoading, productsForImages = [] }) => {
+const CategorySection = ({ categories, isLoading, productsForImages = [], initialCount = 12 }) => {
+  const [showAll, setShowAll] = useState(false);
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -29,9 +30,12 @@ const CategorySection = ({ categories, isLoading, productsForImages = [] }) => {
     );
   }
 
+  const visibleCategories = showAll ? categories : categories.slice(0, initialCount);
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-      {categories.map((category) => {
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        {visibleCategories.map((category) => {
         const img = resolveCategoryImage(category, productsForImages);
         return (
           <Link
@@ -55,8 +59,21 @@ const CategorySection = ({ categories, isLoading, productsForImages = [] }) => {
             </div>
           </Link>
         );
-      })}
-    </div>
+        })}
+      </div>
+
+      {categories.length > initialCount && (
+        <div className="flex justify-center mt-6">
+          <button
+            type="button"
+            onClick={() => setShowAll((v) => !v)}
+            className="px-4 py-2 text-sm font-medium text-white bg-amazon-blue rounded hover:bg-amazon-blue-dark transition-colors"
+          >
+            {showAll ? 'Show less' : `Show ${categories.length - initialCount} more`}
+          </button>
+        </div>
+      )}
+    </>
   );
 };
 

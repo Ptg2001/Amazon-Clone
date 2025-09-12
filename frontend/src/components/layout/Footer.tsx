@@ -11,43 +11,43 @@ const Footer = () => {
       links: [
         { name: 'Careers', href: '/careers' },
         { name: 'Blog', href: '/blog' },
-        { name: 'About Amazon', href: '/about' },
+        { name: 'About NexaCart', href: '/about' },
         { name: 'Investor Relations', href: '/investor-relations' },
-        { name: 'Amazon Devices', href: '/devices' },
-        { name: 'Amazon Science', href: '/science' },
+        { name: 'NexaCart Devices', href: '/devices' },
+        { name: 'NexaCart Labs', href: '/science' },
       ],
     },
     {
       title: 'Make Money with Us',
       links: [
-        { name: 'Sell products on Amazon', href: '/sell' },
-        { name: 'Sell on Amazon Business', href: '/business-sell' },
-        { name: 'Sell apps on Amazon', href: '/app-sell' },
+        { name: 'Sell products on NexaCart', href: '/sell' },
+        { name: 'Sell on NexaCart Business', href: '/business-sell' },
+        { name: 'Sell apps on NexaCart', href: '/app-sell' },
         { name: 'Become an Affiliate', href: '/affiliate' },
         { name: 'Advertise Your Products', href: '/advertise' },
         { name: 'Self-Publish with Us', href: '/publish' },
-        { name: 'Host an Amazon Hub', href: '/hub' },
+        { name: 'Host a NexaCart Hub', href: '/hub' },
       ],
     },
     {
-      title: 'Amazon Payment Products',
+      title: 'NexaCart Payment Products',
       links: [
-        { name: 'Amazon Business Card', href: '/business-card' },
+        { name: 'NexaCart Business Card', href: '/business-card' },
         { name: 'Shop with Points', href: '/points' },
         { name: 'Reload Your Balance', href: '/reload' },
-        { name: 'Amazon Currency Converter', href: '/currency' },
+        { name: 'NexaCart Currency Converter', href: '/currency' },
       ],
     },
     {
       title: 'Let Us Help You',
       links: [
-        { name: 'Amazon and COVID-19', href: '/covid-19' },
+        { name: 'NexaCart and COVID-19', href: '/covid-19' },
         { name: 'Your Account', href: '/profile' },
         { name: 'Your Orders', href: '/orders' },
         { name: 'Shipping Rates & Policies', href: '/shipping' },
         { name: 'Returns & Replacements', href: '/returns' },
         { name: 'Manage Your Content and Devices', href: '/content-devices' },
-        { name: 'Amazon Assistant', href: '/assistant' },
+        { name: 'NexaCart Assistant', href: '/assistant' },
         { name: 'Help', href: '/help' },
       ],
     },
@@ -101,8 +101,8 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row items-center justify-between">
             {/* Logo */}
             <div className="flex items-center mb-4 md:mb-0">
-              <Link to="/" className="text-2xl font-bold text-amazon-orange">
-                amazon
+              <Link to="/" className="flex items-center">
+                <img src="/nexacart-logo.svg" alt="NexaCart" className="h-7 w-auto" />
               </Link>
             </div>
 
@@ -147,7 +147,7 @@ const Footer = () => {
           <div className="mt-8 pt-8 border-t border-gray-700">
             <div className="flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
               <div className="mb-4 md:mb-0">
-                <p>&copy; {currentYear} Amazon Clone. All rights reserved.</p>
+                <p>&copy; {currentYear} NexaCart. All rights reserved.</p>
                 <p className="mt-1">
                   This is a demo project for educational purposes only.
                 </p>

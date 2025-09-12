@@ -10,7 +10,7 @@ const ProfilePage = () => {
   return (
     <>
       <Helmet>
-        <title>My Profile - Amazon Clone</title>
+        <title>My Profile - NexaCart</title>
       </Helmet>
       
       <div className="min-h-screen bg-gray-50 py-8">

@@ -42,7 +42,7 @@ const OrdersPage = () => {
   return (
     <>
       <Helmet>
-        <title>My Orders - Amazon Clone</title>
+        <title>My Orders - NexaCart</title>
       </Helmet>
       
       <div className="min-h-screen bg-gray-50 py-8">

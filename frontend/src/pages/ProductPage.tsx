@@ -76,7 +76,7 @@ const ProductPage = () => {
   return (
     <>
       <Helmet>
-        <title>{`${product?.title || 'Product'} - Amazon Clone`}</title>
+        <title>{`${product?.title || 'Product'} - NexaCart`}</title>
         <meta name="description" content={product?.description || ''} />
         <meta name="keywords" content={(product?.tags || []).join(', ')} />
       </Helmet>

@@ -30,7 +30,7 @@ const ProductsPage = () => {
   return (
     <>
       <Helmet>
-        <title>{`${featured ? 'Featured Products' : 'All Products'} - Amazon Clone`}</title>
+        <title>{`${featured ? 'Featured Products' : 'All Products'} - NexaCart`}</title>
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 py-8">

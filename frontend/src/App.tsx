@@ -13,6 +13,8 @@ import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import ProfilePage from './pages/ProfilePage'
 import OrdersPage from './pages/OrdersPage'
 import OrderDetailsPage from './pages/OrderDetailsPage'
@@ -24,6 +26,7 @@ import AdminProducts from './pages/admin/AdminProducts'
 import AdminAddProduct from './pages/admin/AdminAddProduct'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminUsers from './pages/admin/AdminUsers'
+import AdminSlides from './pages/admin/AdminSlides'
 import NotFoundPage from './pages/NotFoundPage'
 
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -47,12 +50,12 @@ export default function App(): React.ReactElement {
       <CartProvider>
         <div className="App min-h-screen bg-gray-50">
           <Helmet>
-            <title>Amazon Clone - Shop Online</title>
+            <title>NexaCart - Shop Online</title>
             <meta
               name="description"
-              content="Amazon Clone - Your one-stop shop for everything. Free shipping on millions of items. Get the best of Shopping and Entertainment with Prime."
+              content="NexaCart - Your one-stop shop for everything. Free shipping on millions of items. Get the best of Shopping and Entertainment with Prime."
             />
-            <meta name="keywords" content="amazon, shopping, ecommerce, online store, products, deals" />
+            <meta name="keywords" content="nexacart, shopping, ecommerce, online store, products, deals" />
           </Helmet>
 
           <Navbar />
@@ -72,6 +75,8 @@ export default function App(): React.ReactElement {
               <Route path="/search" element={<SearchPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
 
               <Route
                 path="/cart"
@@ -183,6 +188,14 @@ export default function App(): React.ReactElement {
                 element={
                   <AdminRoute>
                     <AdminUsers />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/slides"
+                element={
+                  <AdminRoute>
+                    <AdminSlides />
                   </AdminRoute>
                 }
               />

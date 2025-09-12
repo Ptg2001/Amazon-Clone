@@ -25,7 +25,7 @@ const WishlistPage = () => {
   return (
     <>
       <Helmet>
-        <title>My Wishlist - Amazon Clone</title>
+        <title>My Wishlist - NexaCart</title>
       </Helmet>
       
       <div className="min-h-screen bg-gray-50 py-8">
@@ -55,7 +55,7 @@ const WishlistPage = () => {
                 <div key={product._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex flex-col h-full">
                   <Link to={`/product/${product._id}`} className="block flex-1 flex flex-col">
                     <div className="aspect-square bg-gray-50 rounded mb-2 overflow-hidden flex items-center justify-center" style={{ height: '160px' }}>
-                      <img src={product.images?.[0]?.url || '/images/placeholder.jpg'} alt={product.title} className="w-full h-full object-contain p-1" />
+                      <img src={product.images?.[0]?.url || '/images/placeholder.jpg'} alt={product.title} className="w-full h-full object-contain p-2" />
                     </div>
                     <div className="flex-1 flex flex-col">
                       <h3 className="text-xs font-medium text-gray-900 line-clamp-2 min-h-[2rem] leading-tight">{product.title}</h3>

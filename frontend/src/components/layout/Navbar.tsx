@@ -9,6 +9,8 @@ import CategoryMenu from './CategoryMenu';
 import UserMenu from './UserMenu';
 import CartSidebar from './CartSidebar';
 import countryService from '../../services/countryService';
+import toast from 'react-hot-toast';
+import { useI18n } from '../../contexts/I18nContext';
 
 type Country = { code: string; name: string; flag?: string };
 
@@ -25,6 +27,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useSelector((state: any) => state.auth);
   const { totalItems } = (useCart() as any);
+  const { lang, setLang, available, t } = useI18n();
 
   // Handle scroll effect
   useEffect(() => {
@@ -70,6 +73,7 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
+    toast.success('You have been signed out');
   };
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -93,28 +97,15 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Main Navigation - Amazon Dark Header */}
-      <div className="bg-amazon-dark text-white">
+      {/* Main Navigation - NexaCart Header */}
+      <div className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left Side - Logo and Delivery */}
             <div className="flex items-center gap-4 sm:gap-8">
-              {/* Amazon Logo */}
+              {/* NexaCart Logo */}
               <Link to="/" className="flex items-center">
-                <div className="relative">
-                  <span className="text-3xl font-bold text-white">amazon</span>
-                  <div className="absolute -bottom-2 left-0 w-full h-2">
-                    <svg width="100%" height="100%" viewBox="0 0 200 20" className="overflow-visible">
-                      <path
-                        d="M 8 12 Q 50 2 95 12 Q 140 22 185 12"
-                        stroke="#ff9900"
-                        strokeWidth="4"
-                        fill="none"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
+                <img src="/nexacart-logo.svg" alt="NexaCart" className="h-8 w-auto" />
               </Link>
               
               {/* Delivery Location */}
@@ -174,10 +165,21 @@ const Navbar = () => {
               </button>
 
               {/* Language/Region */}
-              <div className="hidden lg:flex items-center space-x-1 text-white hover:text-gray-300 transition-colors cursor-pointer">
-                <span className="text-lg">🇺🇸</span>
-                <span className="text-sm">EN</span>
-                <FiChevronDown className="h-3 w-3" />
+              <div className="hidden lg:flex items-center space-x-1 text-white hover:text-gray-300 transition-colors cursor-pointer relative country-dropdown">
+                <button onClick={toggleCountryDropdown} className="flex items-center space-x-1">
+                  <span className="text-lg">🌐</span>
+                  <span className="text-sm font-semibold">{lang.toUpperCase()}</span>
+                  <FiChevronDown className="h-3 w-3" />
+                </button>
+                {showCountryDropdown && (
+                  <div className="absolute top-full right-0 mt-2 w-40 bg-white text-gray-800 border border-gray-200 rounded-md shadow-lg z-50">
+                    {available.map((opt) => (
+                      <button key={opt.code} onClick={() => { setLang(opt.code as any); setShowCountryDropdown(false); }} className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 ${lang === opt.code ? 'font-semibold' : ''}`}>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Desktop User Menu */}
@@ -324,8 +326,8 @@ const Navbar = () => {
           </div>
         )}
 
-      {/* Secondary Navigation Bar - Amazon Blue */}
-      <div className="bg-amazon-blue text-white">
+      {/* Secondary Navigation Bar */}
+      <div className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4 sm:gap-8 py-2 overflow-x-auto no-scrollbar">
             {/* All Menu */}

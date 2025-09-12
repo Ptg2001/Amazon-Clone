@@ -40,7 +40,7 @@ const OrderDetailsPage = () => {
   return (
     <>
       <Helmet>
-        <title>{`Order Details - ${order?.orderNumber || id} - Amazon Clone`}</title>
+        <title>{`Order Details - ${order?.orderNumber || id} - NexaCart`}</title>
       </Helmet>
       
       <div className="min-h-screen bg-gray-50 py-8">

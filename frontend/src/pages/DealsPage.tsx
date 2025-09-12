@@ -19,7 +19,7 @@ const DealsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Today’s Deals - Amazon Clone</title>
+        <title>Today’s Deals - NexaCart</title>
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 py-8">
